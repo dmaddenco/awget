@@ -6,8 +6,20 @@
 #define AWGET_AWGET_H
 
 #include <iostream>
+
+using std::cout;
+using std::endl;
+using std::cin;
+using std::cerr;
+
 #include <fstream>
+
+using std::ifstream;
+
 #include <string.h>
+
+using std::string;
+
 #include <stdio.h>
 #include <sys/socket.h>
 #include <stdlib.h>
@@ -16,14 +28,19 @@
 #include <sys/wait.h>
 #include <netinet/in.h>
 #include <sys/types.h>
-#include<unistd.h>
-#include<netdb.h>
+#include <unistd.h>
+#include <netdb.h>
 #include <arpa/inet.h>
-using std::cout;
-using std::endl;
-using std::cin;
-using std::ifstream;
-using std::cerr;
-using std::string;
+
+struct stone {
+	int addr;
+	int port;
+};
+
+class Awget {
+public:
+	stone sstones[];
+	void readFile(char *file);
+};
 
 #endif //AWGET_AWGET_H
