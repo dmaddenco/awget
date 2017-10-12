@@ -6,8 +6,24 @@
 #define AWGET_AWGET_H
 
 #include <iostream>
+#include <fstream>
+#include <string.h>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include<unistd.h>
+#include<netdb.h>
+#include <arpa/inet.h>
 using std::cout;
 using std::endl;
 using std::cin;
+using std::ifstream;
+using std::cerr;
+using std::string;
 
 #endif //AWGET_AWGET_H
