@@ -19,6 +19,15 @@ using std::ifstream;
 #include <string.h>
 
 using std::string;
+using std::stoi;
+
+#include <sstream>
+
+using std::stringstream;
+
+#include <vector>
+
+using std::vector;
 
 #include <stdio.h>
 #include <sys/socket.h>
@@ -32,14 +41,14 @@ using std::string;
 #include <netdb.h>
 #include <arpa/inet.h>
 
-struct stone {
-	int addr;
+struct Stone {
+	string addr;
 	int port;
 };
 
 class Awget {
 public:
-	stone sstones[];
+	vector<Stone> sstones;
 	void readFile(char *file);
 };
 
