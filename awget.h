@@ -29,6 +29,11 @@ using std::stringstream;
 
 using std::vector;
 
+#include <regex>
+
+using std::regex;
+using std::regex_match;
+
 #include <stdio.h>
 #include <sys/socket.h>
 #include <stdlib.h>
@@ -48,7 +53,8 @@ struct Stone {
 
 class Awget {
 public:
-	vector<Stone> sstones;
+	vector <Stone> sstones;
+
 	void readFile(char *file);
 };
 
