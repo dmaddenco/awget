@@ -83,8 +83,8 @@ crashlytics-build.properties
 fabric.properties
 
 # Per Project
-chat
-chat*
+awget
+ss
 .DS_*
 .idea/
 awget.dSYM/

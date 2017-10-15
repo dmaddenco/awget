@@ -6,8 +6,34 @@
 #define AWGET_AWGET_H
 
 #include <iostream>
+
+using std::cout;
+using std::endl;
+using std::cin;
+using std::cerr;
+
 #include <fstream>
+
+using std::ifstream;
+
 #include <string.h>
+
+using std::string;
+using std::stoi;
+
+#include <sstream>
+
+using std::stringstream;
+
+#include <vector>
+
+using std::vector;
+
+#include <regex>
+
+using std::regex;
+using std::regex_match;
+
 #include <stdio.h>
 #include <sys/socket.h>
 #include <stdlib.h>
@@ -16,18 +42,21 @@
 #include <sys/wait.h>
 #include <netinet/in.h>
 #include <sys/types.h>
-#include<unistd.h>
-#include<netdb.h>
+#include <unistd.h>
+#include <netdb.h>
 #include <arpa/inet.h>
-#include <regex>
 
-using std::cout;
-using std::endl;
-using std::cin;
-using std::ifstream;
-using std::cerr;
-using std::string;
-using std::regex;
-using std::regex_match;
+struct Stone {
+	string addr;
+	int port;
+};
+
+class Awget {
+public:
+	vector <Stone> sstones;
+
+	void readFile(ifstream &inFile);
+	bool isValid(string url);
+};
 
 #endif //AWGET_AWGET_H
