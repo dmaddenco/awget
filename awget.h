@@ -55,7 +55,8 @@ class Awget {
 public:
 	vector <Stone> sstones;
 
-	void readFile(char *file);
+	void readFile(ifstream &inFile);
+	bool isValid(string url);
 };
 
 #endif //AWGET_AWGET_H
