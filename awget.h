@@ -19,11 +19,15 @@
 #include<unistd.h>
 #include<netdb.h>
 #include <arpa/inet.h>
+#include <regex>
+
 using std::cout;
 using std::endl;
 using std::cin;
 using std::ifstream;
 using std::cerr;
 using std::string;
+using std::regex;
+using std::regex_match;
 
 #endif //AWGET_AWGET_H
