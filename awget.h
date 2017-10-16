@@ -57,6 +57,9 @@ public:
 
 	void readFile(ifstream &inFile);
 	bool isValid(string url);
+    vector<Stone> getSstones();
+    bool isEmpty(vector<Stone> sstones);
+    Stone findRandStone(vector<Stone> sstones);
 };
 
 #endif //AWGET_AWGET_H
