@@ -32,6 +32,34 @@ bool Awget::isValid(string url) {
 	}
 }
 
+vector<Stone> Awget::getSstones(){
+    return sstones;
+}
+
+bool Awget::isEmpty(vector<Stone> sstones){
+    if(sstones.empty()){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+Stone Awget::findRandStone(vector<Stone> sstones){
+    int random;
+    int size = sstones.size();
+    Stone temp;
+    //seed the rand()
+    srand(time(NULL));
+    random = rand() % size;
+    temp = sstones[random];
+    
+    //remove stone from vector
+    sstones.erase(sstones.begin() + random);
+    return temp;
+}
+
+
 int main(int argc, char *argv[]) {
 	Awget awget;
 
@@ -71,4 +99,5 @@ int main(int argc, char *argv[]) {
 		cerr << "DID NOT RECEIVE CORRECT ARGUMENTS" << endl;
 		exit(EXIT_FAILURE);
 	}
+	
 }
