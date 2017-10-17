@@ -32,6 +32,56 @@ bool Awget::isValid(string url) {
 	}
 }
 
+void Awget::client(char * address, int port, int index, vector <Stone> & sstones){
+    int clientSock;
+    //int buffSize = 500;
+    //char buff[buffSize];
+    
+    clientSock = socket(PF_INET,SOCK_STREAM,IPPROTO_TCP);
+    if(clientSock < 0){
+        cerr << "ERROR CREATING CLIENT SOCKET" << endl;
+        exit(EXIT_FAILURE);
+    }
+    
+    cout << "Client socket created" << endl;
+    
+    struct sockaddr_in ServAddr;
+    ServAddr.sin_family = AF_INET;
+    ServAddr.sin_addr.s_addr = inet_addr(address);
+    ServAddr.sin_port = htons(port);
+    
+    cout << "Connecting to server..." << endl;
+    if(connect(clientSock,(struct sockaddr*)&ServAddr, sizeof(ServAddr)) < 0){
+     cout << "ERROR IN CONNECT" << endl;
+     close(clientSock);
+     exit(EXIT_FAILURE);
+    }
+    
+    cout << "Connected!" << endl;
+    sstones.erase(sstones.begin() + index);
+}
+
+//Drives awget application
+void Awget::initService(vector <Stone> & sstones){
+    //pick random stone and obtain address and port
+    Stone temp;
+    char addr[100];
+    string address = "";
+    int port = 0;
+    
+    time_t t;
+    srand((unsigned) time(&t));
+    int randomNum = rand() % sstones.size();
+    temp = sstones[randomNum];
+    
+    address = temp.addr;
+    port = temp.port;
+    //convert string address to char * addr
+    strcpy(addr, address.c_str());
+    //call client method here
+    client(addr,port,randomNum,sstones);
+}
+
 int main(int argc, char *argv[]) {
 	Awget awget;
 
@@ -71,4 +121,6 @@ int main(int argc, char *argv[]) {
 		cerr << "DID NOT RECEIVE CORRECT ARGUMENTS" << endl;
 		exit(EXIT_FAILURE);
 	}
+	awget.initService(awget.sstones);
+    
 }
