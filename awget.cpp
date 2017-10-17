@@ -12,10 +12,10 @@ void Awget::readFile(ifstream &inFile) {
 	int numStones = stoi(line);
 	for (int i = 0; i < numStones; ++i) {
 		Stone sstone;
-		getline(inFile, line, ' ');
-		sstone.addr = line;
-		getline(inFile, line, ' ');
-		sstone.port = stoi(line);
+		getline(inFile, line);
+		int index = line.find(" ");
+		sstone.addr = line.substr(0, index);
+		sstone.port = stoi(line.substr(index));
 		sstones.push_back(sstone);
 	}
 }
