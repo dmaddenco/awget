@@ -57,6 +57,9 @@ public:
 
 	void readFile(ifstream &inFile);
 	bool isValid(string url);
+    void initService(vector <Stone> & sstones);
+    void client(char * address, int port, int index, vector <Stone> & sstones);
+    
 };
 
 #endif //AWGET_AWGET_H
