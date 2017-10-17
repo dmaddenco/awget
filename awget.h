@@ -51,6 +51,13 @@ struct Stone {
 	int port;
 };
 
+struct ConInfo {
+	string parent;
+	string child;
+	string url;
+	vector<Stone> sstones;
+};
+
 class Awget {
 public:
 	vector <Stone> sstones;
