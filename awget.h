@@ -61,11 +61,11 @@ struct ConInfo {
 class Awget {
 public:
 	vector <Stone> sstones;
-
+	string url;
 	void readFile(ifstream &inFile);
 	bool isValid(string url);
-    void initService(vector <Stone> & sstones);
-    void client(char * address, int port, int index, vector <Stone> & sstones);
+    void initService();
+    void client(char * address, int port, int index);
     
 };
 

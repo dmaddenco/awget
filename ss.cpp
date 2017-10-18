@@ -2,54 +2,54 @@
 // Created by Andy Thai, Collin Kinchen, David Madden on 10/12/17.
 //
 #include "awget.h"
+
 #define BACKLOG 10
 #define MAXDATASIZE 100
-void client(char * address, int port, int index, vector <Stone> & sstones){
-    int clientSock;
-    //int buffSize = 500;
-    //char buff[buffSize];
-    
-    clientSock = socket(PF_INET,SOCK_STREAM,IPPROTO_TCP);
-    if(clientSock < 0){
-        cerr << "ERROR CREATING CLIENT SOCKET" << endl;
-        exit(EXIT_FAILURE);
-    }
-    
-    cout << "Client socket created" << endl;
-    
-    struct sockaddr_in ServAddr;
-    ServAddr.sin_family = AF_INET;
-    ServAddr.sin_addr.s_addr = inet_addr(address);
-    ServAddr.sin_port = htons(port);
-    
-    cout << "Connecting to server..." << endl;
-    if(connect(clientSock,(struct sockaddr*)&ServAddr, sizeof(ServAddr)) < 0){
-     cout << "ERROR IN CONNECT" << endl;
-     close(clientSock);
-     exit(EXIT_FAILURE);
-    }
-    
-    cout << "Connected!" << endl;
-    sstones.erase(sstones.begin() + index);
+
+void client(char *address, int port, int index, vector <Stone> &sstones) {
+	int clientSock;
+	//int buffSize = 500;
+	//char buff[buffSize];
+
+	clientSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (clientSock < 0) {
+		cerr << "ERROR CREATING CLIENT SOCKET" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	cout << "Client socket created" << endl;
+
+	struct sockaddr_in ServAddr;
+	ServAddr.sin_family = AF_INET;
+	ServAddr.sin_addr.s_addr = inet_addr(address);
+	ServAddr.sin_port = htons(port);
+
+	cout << "Connecting to server..." << endl;
+	if (connect(clientSock, (struct sockaddr *) &ServAddr, sizeof(ServAddr)) < 0) {
+		cout << "ERROR IN CONNECT" << endl;
+		close(clientSock);
+		exit(EXIT_FAILURE);
+	}
+
+	cout << "Connected!" << endl;
+	sstones.erase(sstones.begin() + index);
 }
 
-void *get_in_addr(struct sockaddr *sa)
-{
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
+void *get_in_addr(struct sockaddr *sa) {
+	if (sa->sa_family == AF_INET) {
+		return &(((struct sockaddr_in *) sa)->sin_addr);
+	}
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+	return &(((struct sockaddr_in6 *) sa)->sin6_addr);
 }
 
-void sigchld_handler(int s)
-{
-    // waitpid() might overwrite errno, so we save and restore it:
-    int saved_errno = errno;
+void sigchld_handler(int s) {
+	// waitpid() might overwrite errno, so we save and restore it:
+	int saved_errno = errno;
 
-    while(waitpid(-1, NULL, WNOHANG) > 0);
+	while (waitpid(-1, NULL, WNOHANG) > 0);
 
-    errno = saved_errno;
+	errno = saved_errno;
 }
 
 int main(int argc, char *argv[]) {
@@ -80,65 +80,66 @@ int main(int argc, char *argv[]) {
 		cout << "Port " << arg2num << " is out of range" << endl;
 		return -1;
 	}
-	
+
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
-    struct addrinfo hints, *servinfo, *p;
-    struct sockaddr_storage their_addr; // connector's address information
-    socklen_t sin_size;
-    struct sigaction sa;
-    int yes=1;
-    char s[INET6_ADDRSTRLEN];
-    int rv;
-	
+	struct addrinfo hints, *servinfo, *p;
+	struct sockaddr_storage their_addr; // connector's address information
+	socklen_t sin_size;
+//	struct sigaction sa;
+	//TODO: handle sigaction stuff?
+	int yes = 1;
+	char s[INET6_ADDRSTRLEN];
+	int rv;
+
 	memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-	
-	
-	
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+
+
+
 	//open socket for SS server to listen on
-	char* PORT = argv[2];
-	
+	char *PORT = argv[2];
+
 	if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-        return 1;
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+		return 1;
+	}
+
+	// loop through all the results and bind to the first we can
+	for (p = servinfo; p != NULL; p = p->ai_next) {
+		if ((sockfd = socket(p->ai_family, p->ai_socktype,
+							 p->ai_protocol)) == -1) {
+			perror("server: socket");
+			continue;
 		}
 
-    // loop through all the results and bind to the first we can
-    for(p = servinfo; p != NULL; p = p->ai_next) {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype,
-                p->ai_protocol)) == -1) {
-            perror("server: socket");
-            continue;
-        }
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
+					   sizeof(int)) == -1) {
+			perror("setsockopt");
+			exit(1);
+		}
 
-        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-                sizeof(int)) == -1) {
-            perror("setsockopt");
-            exit(1);
-        }
+		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+			close(sockfd);
+			perror("server: bind");
+			continue;
+		}
+		break;
+	}
 
-        if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-            close(sockfd);
-            perror("server: bind");
-            continue;
-        }
-        break;
-    }
+	freeaddrinfo(servinfo); // all done with this structure
 
-    freeaddrinfo(servinfo); // all done with this structure
+	if (p == NULL) {
+		fprintf(stderr, "server: failed to bind\n");
+		exit(1);
+	}
 
-    if (p == NULL)  {
-        fprintf(stderr, "server: failed to bind\n");
-        exit(1);
-    }
-
-    if (listen(sockfd, BACKLOG) == -1) {
-        perror("listen");
-        exit(1);
-    }
-
+	if (listen(sockfd, BACKLOG) == -1) {
+		perror("listen");
+		exit(1);
+	}
+/*
     sa.sa_handler = sigchld_handler; // reap all dead processes
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
@@ -146,90 +147,90 @@ int main(int argc, char *argv[]) {
         perror("sigaction");
         exit(1);
     }
+*/
 
 	struct hostent *he;
 	struct in_addr **addr_list;
 	char hostname[256];
-	gethostname(hostname,256);
+	gethostname(hostname, 256);
 	he = gethostbyname(hostname);
-	addr_list = (struct in_addr **)he->h_addr_list;
-	
-    printf("Waiting for connections on...\n");
-    printf("%s port %s\n", inet_ntoa(*addr_list[0]),PORT);
-	
+	addr_list = (struct in_addr **) he->h_addr_list;
+
+	printf("Waiting for connections on...\n");
+	printf("%s port %s\n", inet_ntoa(*addr_list[0]), PORT);
+
 	//accept connection
-	while (1){
-	      sin_size = sizeof their_addr;
-        new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-        if (new_fd == -1) {
-            perror("accept");
-            continue;
-        }
+	while (1) {
+		sin_size = sizeof their_addr;
+		new_fd = accept(sockfd, (struct sockaddr *) &their_addr, &sin_size);
+		if (new_fd == -1) {
+			perror("accept");
+			continue;
+		}
 
-        inet_ntop(their_addr.ss_family,
-            get_in_addr((struct sockaddr *)&their_addr),
-            s, sizeof s);
-        printf("Found a friend! got connection from %s\n", s);
-        printf("You recieve first.\n");
-	int numbytes;
-	
-	//recieve packet
-	while(true){
-	struct ConInfo packet;
-	if ((numbytes = recv(new_fd, &packet, sizeof (packet), 0)) == -1) {
-		perror("recv");
+		inet_ntop(their_addr.ss_family,
+				  get_in_addr((struct sockaddr *) &their_addr),
+				  s, sizeof s);
+		printf("Found a friend! got connection from %s\n", s);
+		printf("You recieve first.\n");
+		int numbytes;
 
-    }
-	cout << "got packet" << endl;
-	//printf("URL: %s\n",packet.url);
-	cout << "URL: " << packet.url << endl;
+		//recieve packet
+		//TODO: figure out if we still need this while loop
+//	while(true){
+		struct ConInfo packet;
+		if ((numbytes = recv(new_fd, &packet, sizeof(packet), 0)) == -1) {
+			perror("recv");
+
+		}
+		cout << "got packet" << endl;
+		//printf("URL: %s\n",packet.url);
+		cout << "URL: " << packet.url << endl;
 	}
-	}
+//	}
 	cout << "made it past where you want to be" << endl;
 	//need to print packet
-	
+
 	//end socket opening
 
 	//recieve connection from and get open recieve packet to get sstone and URL
 	//probably need to declare a struct to recieve info
-			//need vector of stones
-			//parent stone ip and port
-			//URL
-	
+	//need vector of stones
+	//parent stone ip and port
+	//URL
+
 	vector <Stone> sstones; //will recieve this in struct from prior stone
-	
-	if (sstones.size() != 0){
+
+	if (sstones.size() != 0) {
 		//find random stone to hop to again
 		//pick random stone and obtain address and port
-    Stone temp;
-    char addr[100];
-    string address = "";
-    int port = 0;
-    
-    time_t t;
-    srand((unsigned) time(&t));
-    int randomNum = rand() % sstones.size();
-    temp = sstones[randomNum];
-    
-    address = temp.addr;
-    port = temp.port;
-    //convert string address to char * addr
-    strcpy(addr, address.c_str());
-    //call client method here
-    
-	client(addr,port,randomNum,sstones);
+		Stone temp;
+		char addr[100];
+		string address = "";
+		int port = 0;
 
-	}else{
+		time_t t;
+		srand((unsigned) time(&t));
+		int randomNum = rand() % sstones.size();
+		temp = sstones[randomNum];
+
+		address = temp.addr;
+		port = temp.port;
+		//convert string address to char * addr
+		strcpy(addr, address.c_str());
+		//call client method here
+
+		client(addr, port, randomNum, sstones);
+
+	} else {
 		//go out and get URL
 
 		//system("wget -q " + URL);
-		
+
 		//get return address to last stone and send the downloaded file
-		
+
 	}
-	
-	
-	
-	
+
+
 	return 0;
 }

@@ -32,7 +32,7 @@ bool Awget::isValid(string url) {
 	}
 }
 
-void Awget::client(char *address, int port, int index, vector <Stone> &sstones) {
+void Awget::client(char *address, int port, int index) {
 	int clientSock;
 	//int buffSize = 500;
 	//char buff[buffSize];
@@ -61,13 +61,13 @@ void Awget::client(char *address, int port, int index, vector <Stone> &sstones) 
 	sstones.erase(sstones.begin() + index);
 	ConInfo info;
 	info.parent = address;
-	info.url = "www.google.com";
+	info.url = url;
 //	info.sstones = sstones;
 	send(clientSock, &info, sizeof(info), 0);
 }
 
 //Drives awget application
-void Awget::initService(vector <Stone> &sstones) {
+void Awget::initService() {
 	//pick random stone and obtain address and port
 	Stone temp;
 	char addr[100];
@@ -84,16 +84,15 @@ void Awget::initService(vector <Stone> &sstones) {
 	//convert string address to char * addr
 	strcpy(addr, address.c_str());
 	//call client method here
-	client(addr, port, randomNum, sstones);
+	client(addr, port, randomNum);
 }
 
 int main(int argc, char *argv[]) {
 	Awget awget;
-
 	//if only URL is specified
 	if (argc == 2) {
-		string url(argv[1]);
-		if (!awget.isValid(url)) {
+		awget.url = argv[1];
+		if (!awget.isValid(awget.url)) {
 			cerr << "URL INVALID" << endl;
 			exit(EXIT_FAILURE);
 		}
@@ -109,8 +108,8 @@ int main(int argc, char *argv[]) {
 	}
 		//if URL and chaingang file given and -c flag is used
 	else if (argc > 2 && (strcmp(argv[2], "-c") == 0)) {
-		string url(argv[1]);
-		if (!awget.isValid(url)) {
+		awget.url = argv[1];
+		if (!awget.isValid(awget.url)) {
 			cerr << "URL INVALID" << endl;
 			exit(EXIT_FAILURE);
 		}
@@ -126,6 +125,6 @@ int main(int argc, char *argv[]) {
 		cerr << "DID NOT RECEIVE CORRECT ARGUMENTS" << endl;
 		exit(EXIT_FAILURE);
 	}
-	awget.initService(awget.sstones);
+	awget.initService();
 
 }
