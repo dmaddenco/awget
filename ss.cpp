@@ -186,6 +186,7 @@ int main(int argc, char *argv[]) {
 		cout << "got packet" << endl;
 		//printf("URL: %s\n",packet.url);
 		cout << "URL: " << packet.url << endl;
+		cout << "packet.sstones[0].addr: " << packet.sstones[0].addr << endl;
 	}
 //	}
 	cout << "made it past where you want to be" << endl;
