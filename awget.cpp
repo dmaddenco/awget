@@ -62,7 +62,6 @@ void Awget::client(char *address, int port, int index) {
 	ConInfo info;
 	info.parent = address;
 	info.url = url;
-	cout << sstones.size() << endl;
 	info.sstones = sstones;
 	send(clientSock, &info, sizeof(info), 0);
 }
