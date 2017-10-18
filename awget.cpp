@@ -32,63 +32,67 @@ bool Awget::isValid(string url) {
 	}
 }
 
-void Awget::client(char * address, int port, int index, vector <Stone> & sstones){
-    int clientSock;
-    //int buffSize = 500;
-    //char buff[buffSize];
-    
-    clientSock = socket(PF_INET,SOCK_STREAM,IPPROTO_TCP);
-    if(clientSock < 0){
-        cerr << "ERROR CREATING CLIENT SOCKET" << endl;
-        exit(EXIT_FAILURE);
-    }
-    
-    cout << "Client socket created" << endl;
-    
-    struct sockaddr_in ServAddr;
-    ServAddr.sin_family = AF_INET;
-    ServAddr.sin_addr.s_addr = inet_addr(address);
-    ServAddr.sin_port = htons(port);
-    
-    cout << "Connecting to server..." << endl;
-    if(connect(clientSock,(struct sockaddr*)&ServAddr, sizeof(ServAddr)) < 0){
-     cout << "ERROR IN CONNECT" << endl;
-     close(clientSock);
-     exit(EXIT_FAILURE);
-    }
-    
-    cout << "Connected!" << endl;
-    sstones.erase(sstones.begin() + index);
+void Awget::client(char *address, int port, int index) {
+	int clientSock;
+	//int buffSize = 500;
+	//char buff[buffSize];
+
+	clientSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (clientSock < 0) {
+		cerr << "ERROR CREATING CLIENT SOCKET" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+//	cout << "Client socket created" << endl;
+
+	struct sockaddr_in ServAddr;
+	ServAddr.sin_family = AF_INET;
+	ServAddr.sin_addr.s_addr = inet_addr(address);
+	ServAddr.sin_port = htons(port);
+
+//	cout << "Connecting to server..." << endl;
+	if (connect(clientSock, (struct sockaddr *) &ServAddr, sizeof(ServAddr)) < 0) {
+		cerr << "ERROR IN CONNECT" << endl;
+		close(clientSock);
+		exit(EXIT_FAILURE);
+	}
+
+//	cout << "Connected!" << endl;
+	sstones.erase(sstones.begin() + index);
+	ConInfo info;
+	info.parent = address;
+	info.url = url;
+	info.sstones = sstones;
+	send(clientSock, &info, sizeof(info), 0);
 }
 
 //Drives awget application
-void Awget::initService(vector <Stone> & sstones){
-    //pick random stone and obtain address and port
-    Stone temp;
-    char addr[100];
-    string address = "";
-    int port = 0;
-    
-    time_t t;
-    srand((unsigned) time(&t));
-    int randomNum = rand() % sstones.size();
-    temp = sstones[randomNum];
-    
-    address = temp.addr;
-    port = temp.port;
-    //convert string address to char * addr
-    strcpy(addr, address.c_str());
-    //call client method here
-    client(addr,port,randomNum,sstones);
+void Awget::initService() {
+	//pick random stone and obtain address and port
+	Stone temp;
+	char addr[100];
+	string address = "";
+	int port = 0;
+
+	time_t t;
+	srand((unsigned) time(&t));
+	int randomNum = rand() % sstones.size();
+	temp = sstones[randomNum];
+
+	address = temp.addr;
+	port = temp.port;
+	//convert string address to char * addr
+	strcpy(addr, address.c_str());
+	//call client method here
+	client(addr, port, randomNum);
 }
 
 int main(int argc, char *argv[]) {
 	Awget awget;
-
 	//if only URL is specified
 	if (argc == 2) {
-		string url(argv[1]);
-		if (!awget.isValid(url)) {
+		awget.url = argv[1];
+		if (!awget.isValid(awget.url)) {
 			cerr << "URL INVALID" << endl;
 			exit(EXIT_FAILURE);
 		}
@@ -104,8 +108,8 @@ int main(int argc, char *argv[]) {
 	}
 		//if URL and chaingang file given and -c flag is used
 	else if (argc > 2 && (strcmp(argv[2], "-c") == 0)) {
-		string url(argv[1]);
-		if (!awget.isValid(url)) {
+		awget.url = argv[1];
+		if (!awget.isValid(awget.url)) {
 			cerr << "URL INVALID" << endl;
 			exit(EXIT_FAILURE);
 		}
@@ -121,6 +125,6 @@ int main(int argc, char *argv[]) {
 		cerr << "DID NOT RECEIVE CORRECT ARGUMENTS" << endl;
 		exit(EXIT_FAILURE);
 	}
-	awget.initService(awget.sstones);
-    
+	awget.initService();
+
 }
