@@ -298,7 +298,7 @@ int main(int argc, char *argv[]) {
 		client(packet.url, addr, port, randomNum, sstones);
 
 	} else {
-		cout << "eat my ass hole cindy" << endl;
+		cout << "got to last sstone" << endl;
 		//go out and get URL
 //		string url = packet.url;
 //		system("wget -q " + packet.url);
