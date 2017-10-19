@@ -20,6 +20,7 @@ using std::ifstream;
 
 using std::string;
 using std::stoi;
+using std::to_string;
 
 #include <sstream>
 
@@ -46,27 +47,34 @@ using std::regex_match;
 #include <netdb.h>
 #include <arpa/inet.h>
 
+#define MAX_PACKET_SIZE 1400
+
 struct Stone {
 	string addr;
 	int port;
 };
 
 struct ConInfo {
-	string parent;
-	string child;
-	string url;
-	vector<Stone> sstones;
+	char parent[MAX_PACKET_SIZE];
+	char url[MAX_PACKET_SIZE];
+	char sstones[MAX_PACKET_SIZE];
+};
+
+struct ResultGet {
+	int seqNum;
+	char parent[MAX_PACKET_SIZE];
+	char file[MAX_PACKET_SIZE];
 };
 
 class Awget {
 public:
 	vector <Stone> sstones;
-
+	string url;
 	void readFile(ifstream &inFile);
 	bool isValid(string url);
-    void initService(vector <Stone> & sstones);
-    void client(char * address, int port, int index, vector <Stone> & sstones);
-    
+    void initService();
+    void client(char * address, int port, int index);
+    string serialize();
 };
 
 #endif //AWGET_AWGET_H
