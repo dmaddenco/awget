@@ -6,7 +6,7 @@
 #define BACKLOG 10
 #define MAXDATASIZE 100
 
-void client(char *address, int port, int index, vector <Stone> &sstones) {
+void client(char *address, int port, int index) {
 	int clientSock;
 	//int buffSize = 500;
 	//char buff[buffSize];
@@ -17,22 +17,27 @@ void client(char *address, int port, int index, vector <Stone> &sstones) {
 		exit(EXIT_FAILURE);
 	}
 
-	cout << "Client socket created" << endl;
+//	cout << "Client socket created" << endl;
 
 	struct sockaddr_in ServAddr;
 	ServAddr.sin_family = AF_INET;
 	ServAddr.sin_addr.s_addr = inet_addr(address);
 	ServAddr.sin_port = htons(port);
 
-	cout << "Connecting to server..." << endl;
+//	cout << "Connecting to server..." << endl;
 	if (connect(clientSock, (struct sockaddr *) &ServAddr, sizeof(ServAddr)) < 0) {
-		cout << "ERROR IN CONNECT" << endl;
+		cerr << "ERROR IN CONNECT" << endl;
 		close(clientSock);
 		exit(EXIT_FAILURE);
 	}
 
-	cout << "Connected!" << endl;
+//	cout << "Connected!" << endl;
 	sstones.erase(sstones.begin() + index);
+	ConInfo info;
+	info.parent = address;
+	info.url = url;
+	info.sstones = sstones;
+	send(clientSock, &info, sizeof(info), 0);
 }
 
 void *get_in_addr(struct sockaddr *sa) {
@@ -189,7 +194,6 @@ int main(int argc, char *argv[]) {
 		cout << "packet.sstones[0].addr: " << packet.sstones[0].addr << endl;
 	}
 //	}
-	cout << "made it past where you want to be" << endl;
 	//need to print packet
 
 	//end socket opening
@@ -220,13 +224,13 @@ int main(int argc, char *argv[]) {
 		//convert string address to char * addr
 		strcpy(addr, address.c_str());
 		//call client method here
-
-		client(addr, port, randomNum, sstones);
+		cout << "going to go get another ss" << endl;
+		client(addr, port, randomNum);
 
 	} else {
 		//go out and get URL
-
-		//system("wget -q " + URL);
+		string wget = "wget -q " + packet.url 
+		system(wget);
 
 		//get return address to last stone and send the downloaded file
 
