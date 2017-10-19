@@ -120,7 +120,7 @@ void sigchld_handler(int s) {
 	errno = saved_errno;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]){
 	//Argument Checking
 	//Are there too many arguments
 	if (argc > 3) {
@@ -300,9 +300,12 @@ int main(int argc, char *argv[]) {
 	} else {
 		cout << "got to last sstone" << endl;
 		//go out and get URL
-//		string url = packet.url;
-//		system("wget -q " + packet.url);
-
+		string url = packet.url;
+		string command = "wget -q " + url;
+		cout << command << endl;
+		system(command.c_str());
+//		int result = system(command.c_str());
+//		cout << result << endl;
 		//get return address to last stone and send the downloaded file
 
 	}
