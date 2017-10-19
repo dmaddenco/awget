@@ -6,6 +6,56 @@
 #define BACKLOG 10
 #define MAXDATASIZE 100
 
+vector<Stone> unpack(char chain[]){
+	vector<string> tokens;
+	char *temp = strtok(chain,",");
+	while (temp != NULL){
+	//cout << temp << endl;
+	// char test[256];
+	string hello = temp;
+	//cout << hello << endl;
+	// strcpy(test,tempc_str());
+	tokens.push_back(hello);
+	temp = strtok(NULL,",");
+}
+
+int size = tokens.size();
+vector<Stone> sstones;
+for (int i = 0; i < size; i++){
+	 string index = tokens[i];
+	 char test[256];
+	 strcpy(test,index.c_str());
+	 char *temp = strtok(test," ");
+	 int ip = 1;
+	 Stone sstone;
+	while (temp != NULL){
+		if (ip){
+			// cout << "IP: " << temp << endl;
+			sstone.addr = temp;
+			ip = 0;
+		}else{
+			// cout << "PORT: " << temp << endl;
+			int change = atoi(temp);
+			sstone.port = change;
+			ip = 1;
+		}
+
+		temp = strtok(NULL," ");
+	}
+	sstones.push_back(sstone);
+	// cout << "NEXT" << endl;
+ }
+ 
+ // size = sstones.size();
+ // for (int i = 0; i < size; i++){
+	// cout << "IP: " << sstones[i].addr << endl;
+	// cout << "PORT: " << sstones[i].port << endl;
+	// cout << "NEXT" << endl;
+
+ // }
+ return sstones;
+}
+
 void client(char *address, int port, int index, vector <Stone> &sstones) {
 	int clientSock;
 	//int buffSize = 500;
@@ -158,6 +208,7 @@ int main(int argc, char *argv[]) {
 
 	printf("Waiting for connections on...\n");
 	printf("%s port %s\n", inet_ntoa(*addr_list[0]), PORT);
+	vector <Stone> sstones; //will recieve this in struct from prior stone
 
 	//accept connection
 	while (1) {
@@ -190,6 +241,7 @@ int main(int argc, char *argv[]) {
 //		cout << parent << endl;
 //		cout << url << endl;
 //		cout << chaingain << endl;
+	sstones = unpack(packet.sstones);
 	}
 //	}
 
@@ -204,8 +256,8 @@ int main(int argc, char *argv[]) {
 	//parent stone ip and port
 	//URL
 
-	vector <Stone> sstones; //will recieve this in struct from prior stone
-
+	
+	
 	if (sstones.size() != 0) {
 		//find random stone to hop to again
 		//pick random stone and obtain address and port

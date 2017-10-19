@@ -34,9 +34,10 @@ bool Awget::isValid(string url) {
 
 string Awget::serialize() {
 	string serStones;
-	for (int i = 0; i < sstones.size(); ++i) {
+	int size = sstones.size();
+	for (int i = 0; i < size; ++i) {
 		serStones += (sstones[i].addr + " " + to_string(sstones[i].port));
-		if (i != sstones.size() - 1) {
+		if (i != size - 1) {
 			serStones += ",";
 		}
 	}
