@@ -32,12 +32,23 @@ bool Awget::isValid(string url) {
 	}
 }
 
+string Awget::serialize() {
+	string serStones;
+	for (int i = 0; i < sstones.size(); ++i) {
+		serStones += (sstones[i].addr + " " + to_string(sstones[i].port));
+		if (i != sstones.size() - 1) {
+			serStones += ",";
+		}
+	}
+	return serStones;
+}
+
 void Awget::client(char *address, int port, int index) {
 	int clientSock;
 	//int buffSize = 500;
 	//char buff[buffSize];
 
-	clientSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	clientSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (clientSock < 0) {
 		cerr << "ERROR CREATING CLIENT SOCKET" << endl;
 		exit(EXIT_FAILURE);
@@ -62,7 +73,10 @@ void Awget::client(char *address, int port, int index) {
 	ConInfo info;
 	info.parent = address;
 	info.url = url;
-	info.sstones = sstones;
+//	string temp = serialize();
+	strcpy(info.sstones, serialize().c_str());
+//	info.sstones = serialize().c_str();
+	cout << info.sstones << endl;
 	send(clientSock, &info, sizeof(info), 0);
 }
 

@@ -11,7 +11,7 @@ void client(char *address, int port, int index, vector <Stone> &sstones) {
 	//int buffSize = 500;
 	//char buff[buffSize];
 
-	clientSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	clientSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (clientSock < 0) {
 		cerr << "ERROR CREATING CLIENT SOCKET" << endl;
 		exit(EXIT_FAILURE);
@@ -178,17 +178,22 @@ int main(int argc, char *argv[]) {
 		//recieve packet
 		//TODO: figure out if we still need this while loop
 //	while(true){
-		struct ConInfo packet;
+		ConInfo packet;
 		if ((numbytes = recv(new_fd, &packet, sizeof(packet), 0)) == -1) {
 			perror("recv");
 
 		}
 		cout << "got packet" << endl;
-		//printf("URL: %s\n",packet.url);
-		cout << "URL: " << packet.url << endl;
-		cout << "packet.sstones[0].addr: " << packet.sstones[0].addr << endl;
+//		cout << "URL: " << packet.url << endl;
+//		cout << "parent: " << packet.parent << endl;
+//		for (int i = 0; i < strlen(packet.sstones); ++i) {
+//			cout << packet.sstones[i];
+//		}
+//		cout << endl;
+//		cout << "packet.sstones.size(): " << packet.sstones.size() << endl;
 	}
 //	}
+
 	cout << "made it past where you want to be" << endl;
 	//need to print packet
 
@@ -231,7 +236,6 @@ int main(int argc, char *argv[]) {
 		//get return address to last stone and send the downloaded file
 
 	}
-
 
 	return 0;
 }
