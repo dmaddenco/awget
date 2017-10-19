@@ -55,9 +55,15 @@ struct Stone {
 };
 
 struct ConInfo {
-	string parent;
-	string url;
+	char parent[MAX_PACKET_SIZE];
+	char url[MAX_PACKET_SIZE];
 	char sstones[MAX_PACKET_SIZE];
+};
+
+struct ResultGet {
+	int seqNum;
+	char parent[MAX_PACKET_SIZE];
+	char file[MAX_PACKET_SIZE];
 };
 
 class Awget {

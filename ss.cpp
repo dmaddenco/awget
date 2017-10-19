@@ -183,14 +183,13 @@ int main(int argc, char *argv[]) {
 			perror("recv");
 
 		}
-		cout << "got packet" << endl;
-//		cout << "URL: " << packet.url << endl;
-//		cout << "parent: " << packet.parent << endl;
-//		for (int i = 0; i < strlen(packet.sstones); ++i) {
-//			cout << packet.sstones[i];
-//		}
-//		cout << endl;
-//		cout << "packet.sstones.size(): " << packet.sstones.size() << endl;
+//		cout << "got packet" << endl;
+//		string parent = packet.parent;
+//		string url = packet.url;
+//		string chaingain = packet.sstones;
+//		cout << parent << endl;
+//		cout << url << endl;
+//		cout << chaingain << endl;
 	}
 //	}
 
