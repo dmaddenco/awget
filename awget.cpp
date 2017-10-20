@@ -6,6 +6,8 @@
 
 #include "awget.h"
 
+#define AWGET_PORT 5000
+
 void Awget::readFile(ifstream &inFile) {
 	string line;
 	getline(inFile, line);
@@ -76,7 +78,9 @@ void Awget::client(char *address, int port, int index) {
 //	info.url = url;
 //	string temp = serialize();
 	string temp = address;
-	strcpy(info.parent, temp.c_str());
+//	strcpy(info.parent, temp.c_str());
+	info.parentPort = AWGET_PORT;
+	info.selfPort = port;
 	strcpy(info.url, url.c_str());
 	strcpy(info.sstones, serialize().c_str());
 //	info.sstones = serialize().c_str();
@@ -102,6 +106,7 @@ void Awget::initService() {
 	//convert string address to char * addr
 	strcpy(addr, address.c_str());
 	//call client method here
+	cout << "port to connect to: " << temp.port << endl;
 	client(addr, port, randomNum);
 }
 
