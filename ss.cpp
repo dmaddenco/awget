@@ -99,6 +99,7 @@ void client(char *url, char *address, int port, int parentPort, int index, vecto
 	string temp = address;
 //	strcpy(info.parent, temp.c_str());
 	info.parentPort = parentPort;
+	info.selfPort = port;
 	strcpy(info.url, url);
 	strcpy(info.sstones, serialize(sstones).c_str());
 	send(clientSock, &info, sizeof(info), 0);
@@ -242,6 +243,7 @@ int main(int argc, char *argv[]){
 //		cout << "made it past where you want to be" << endl;
 
 		cout << "MY PARENTS PORT IS: " << packet.parentPort << endl;
+		cout << "MY OWN PORT I NEED TO LISTEN TO IS: " << packet.selfPort << endl;
 		//need to print packet
 
 		//end socket opening
