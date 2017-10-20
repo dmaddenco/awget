@@ -74,17 +74,10 @@ void Awget::client(char *address, int port, int index) {
 //	cout << "Connected!" << endl;
 	sstones.erase(sstones.begin() + index);
 	ConInfo info;
-//	info.parent = address;
-//	info.url = url;
-//	string temp = serialize();
 	string temp = address;
-//	strcpy(info.parent, temp.c_str());
 	info.parentPort = AWGET_PORT;
-	info.selfPort = port;
 	strcpy(info.url, url.c_str());
 	strcpy(info.sstones, serialize().c_str());
-//	info.sstones = serialize().c_str();
-//	cout << info.sstones << endl;
 	send(clientSock, &info, sizeof(info), 0);
 }
 
