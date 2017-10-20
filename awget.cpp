@@ -6,8 +6,6 @@
 
 #include "awget.h"
 
-#define AWGET_PORT 5000
-
 void Awget::readFile(ifstream &inFile) {
 	string line;
 	getline(inFile, line);
@@ -75,7 +73,7 @@ void Awget::client(char *address, int port, int index) {
 	sstones.erase(sstones.begin() + index);
 	ConInfo info;
 	string temp = address;
-	info.parentPort = AWGET_PORT;
+//	info.parentPort = AWGET_PORT;
 	strcpy(info.url, url.c_str());
 	strcpy(info.sstones, serialize().c_str());
 	send(clientSock, &info, sizeof(info), 0);
@@ -142,5 +140,4 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 	awget.initService();
-
 }
