@@ -68,7 +68,7 @@ string serialize(vector <Stone> sstones) {
 	return serStones;
 }
 
-void client(char *url, char *address, int port, int index, vector <Stone> &sstones) {
+void client(char *url, char *address, int port, int parentPort, int index, vector <Stone> &sstones) {
 	int clientSock;
 	//int buffSize = 500;
 	//char buff[buffSize];
@@ -97,7 +97,8 @@ void client(char *url, char *address, int port, int index, vector <Stone> &sston
 	sstones.erase(sstones.begin() + index);
 	ConInfo info;
 	string temp = address;
-	strcpy(info.parent, temp.c_str());
+//	strcpy(info.parent, temp.c_str());
+	info.parentPort = parentPort;
 	strcpy(info.url, url);
 	strcpy(info.sstones, serialize(sstones).c_str());
 	send(clientSock, &info, sizeof(info), 0);
@@ -182,12 +183,6 @@ int main(int argc, char *argv[]){
 			continue;
 		}
 
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-					   sizeof(int)) == -1) {
-			perror("setsockopt");
-			exit(1);
-		}
-
 		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
 			close(sockfd);
 			perror("server: bind");
@@ -207,15 +202,6 @@ int main(int argc, char *argv[]){
 		perror("listen");
 		exit(1);
 	}
-/*
-    sa.sa_handler = sigchld_handler; // reap all dead processes
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    if (sigaction(SIGCHLD, &sa, NULL) == -1) {
-        perror("sigaction");
-        exit(1);
-    }
-*/
 
 	struct hostent *he;
 	struct in_addr **addr_list;
@@ -229,86 +215,75 @@ int main(int argc, char *argv[]){
 	vector <Stone> sstones; //will recieve this in struct from prior stone
 
 	//accept connection
-//	while (1) {
-	sin_size = sizeof their_addr;
-	new_fd = accept(sockfd, (struct sockaddr *) &their_addr, &sin_size);
-	if (new_fd == -1) {
-		perror("accept");
-//			continue;
-	}
+	while (1) {
+		sin_size = sizeof their_addr;
+		new_fd = accept(sockfd, (struct sockaddr *) &their_addr, &sin_size);
+		if (new_fd == -1) {
+			perror("accept");
+			continue;
+		}
 
-	inet_ntop(their_addr.ss_family,
-			  get_in_addr((struct sockaddr *) &their_addr),
-			  s, sizeof s);
-	printf("Found a friend! got connection from %s\n", s);
-	printf("You recieve first.\n");
-	int numbytes;
+		inet_ntop(their_addr.ss_family,
+				  get_in_addr((struct sockaddr *) &their_addr),
+				  s, sizeof s);
+		printf("Found a friend! got connection from %s\n", s);
+		printf("You recieve first.\n");
+		cout << "MY PARENTS IP IS: " << s << endl;
+		int numbytes;
 
-	//recieve packet
-	//TODO: figure out if we still need this while loop
-//	while(true){
-	ConInfo packet;
-	if ((numbytes = recv(new_fd, &packet, sizeof(packet), 0)) == -1) {
-		perror("recv");
+		//recieve packet
+		ConInfo packet;
+		if ((numbytes = recv(new_fd, &packet, sizeof(packet), 0)) == -1) {
+			perror("recv");
 
-	}
-//		cout << "got packet" << endl;
-//		string parent = packet.parent;
-//		string url = packet.url;
-//		string chaingain = packet.sstones;
-//		cout << parent << endl;
-//		cout << url << endl;
-//		cout << chaingain << endl;
-	sstones = unpack(packet.sstones);
-//	}
-//	}
+		}
+		sstones = unpack(packet.sstones);
 
-	cout << "made it past where you want to be" << endl;
-	//need to print packet
+//		cout << "made it past where you want to be" << endl;
 
-	//end socket opening
+		cout << "MY PARENTS PORT IS: " << packet.parentPort << endl;
+		//need to print packet
 
-	//recieve connection from and get open recieve packet to get sstone and URL
-	//probably need to declare a struct to recieve info
-	//need vector of stones
-	//parent stone ip and port
-	//URL
+		//end socket opening
 
+		//recieve connection from and get open recieve packet to get sstone and URL
+		//probably need to declare a struct to recieve info
+		//need vector of stones
+		//parent stone ip and port
+		//URL
 
+		if (sstones.size() != 0) {
+			//find random stone to hop to again
+			//pick random stone and obtain address and port
+			Stone temp;
+			char addr[100];
+			string address = "";
+			int port = 0;
 
-	if (sstones.size() != 0) {
-		//find random stone to hop to again
-		//pick random stone and obtain address and port
-		Stone temp;
-		char addr[100];
-		string address = "";
-		int port = 0;
+			time_t t;
+			srand((unsigned) time(&t));
+			int randomNum = rand() % sstones.size();
+			temp = sstones[randomNum];
 
-		time_t t;
-		srand((unsigned) time(&t));
-		int randomNum = rand() % sstones.size();
-		temp = sstones[randomNum];
+			address = temp.addr;
+			port = temp.port;
+			//convert string address to char * addr
+			strcpy(addr, address.c_str());
+			//call client method here
 
-		address = temp.addr;
-		port = temp.port;
-		//convert string address to char * addr
-		strcpy(addr, address.c_str());
-		//call client method here
+			client(packet.url, addr, port, atoi(PORT), randomNum, sstones);
 
-		client(packet.url, addr, port, randomNum, sstones);
-
-	} else {
-		cout << "got to last sstone" << endl;
-		//go out and get URL
-		string url = packet.url;
-		string command = "wget -q " + url;
-		cout << command << endl;
-		system(command.c_str());
+		} else {
+			cout << "got to last sstone" << endl;
+			//go out and get URL
+			string url = packet.url;
+			string command = "wget -q " + url;
+			cout << command << endl;
+			system(command.c_str());
 //		int result = system(command.c_str());
-//		cout << result << endl;
-		//get return address to last stone and send the downloaded file
+			//get return address to last stone and send the downloaded file
 
+		}
 	}
-
 	return 0;
 }

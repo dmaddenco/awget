@@ -58,7 +58,7 @@ struct Stone {
 };
 
 struct ConInfo {
-	char parent[MAX_IP_SIZE];
+	int parentPort;	//port number of parent
 	char url[MAX_URL_SIZE];
 	char sstones[MAX_SSTONES_SIZE];
 };
