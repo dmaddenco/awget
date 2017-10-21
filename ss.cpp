@@ -91,6 +91,14 @@ void client(char *url, char *address, int port, int parentPort, int index, vecto
 		exit(EXIT_FAILURE);
 	}
 
+	FD_SET(clientSock,&readfds);
+	n = clientSock +1;
+	tv.tv_sec = 3*60;
+	tv.tv_usec = 0;
+	//sv = select(n, &readfds, NULL, NULL, &tv);
+	//		cout << "MADE IT HERE" << endl;
+
+	
 	cout << "Connected!" << endl;
 	sstones.erase(sstones.begin() + index);
 	ConInfo info;
@@ -99,7 +107,24 @@ void client(char *url, char *address, int port, int parentPort, int index, vecto
 //	info.selfPort = port;
 	strcpy(info.url, url);
 	strcpy(info.sstones, serialize(sstones).c_str());
+	//if (FD_ISSET(clientSock,&readfds)){
 	send(clientSock, &info, sizeof(info), 0);
+	
+	sv = select(n, &readfds, NULL, NULL, &tv);			
+	if (sv == -1) {
+	perror("select"); // error occurred in select()
+	} else if (sv == 0) {
+	printf("Timeout occurred!  No data after 10.5 seconds.\n");
+	} else {
+		cout << "HERE BITCHES" << endl;
+	// one or both of the descriptors have data
+	if (FD_ISSET(clientSock, &readfds)) {
+	recv(clientSock, buf1, sizeof buf1, 0);
+	
+	cout << "BUF1: " << buf1 << endl;
+	}
+	}
+	//}
 }
 
 void *get_in_addr(struct sockaddr *sa) {
@@ -217,9 +242,20 @@ void establishConnection() {
 		sstones = unpack(packet.sstones);
 
 		cout << "MY PARENTS IP IS: " << inIpAddress << endl;
-		cout << "MY PARENTS PORT IS: " << packet.parentPort << endl;
+		//cout << "MY PARENTS PORT IS: " << packet.parentPort << endl;
+//################################################################################
+		 FD_ZERO(&readfds);
+		 FD_SET(sock_in, &readfds);
+		// n = new_fd;
+		// tv.tv_sec = 3*60;
+		// tv.tv_usec = 0;
+		// sv = select(n, &readfds, NULL, NULL, &tv);
+		// cout << "MADE IT HERE" << endl;
 
+//################################################################################
+		cout << "STONE SIZE: " << sstones.size() << endl;
 		if (sstones.size() != 0) {
+			cout << "SIZE ISNT 0" << endl;
 			//find random stone to hop to again
 			//pick random stone and obtain address and port
 			Stone temp;
@@ -241,6 +277,7 @@ void establishConnection() {
 			//call client method here
 			client(packet.url, addr, port, atoi(PORT), randomNum, sstones);	//connect to new sstone
 
+
 		} else {
 			cout << "got to last sstone" << endl;
 			//go out and get URL
@@ -252,6 +289,10 @@ void establishConnection() {
 				perror("wget error");
 				exit(EXIT_FAILURE);
 			}
+			//if (FD_ISSET(new_fd,&readfds)){
+				cout << "time to send things back" << endl;
+			//}
+			//send(clientSock, &info, sizeof(info), 0);
 			//get return address to last stone and send the downloaded file
 
 		}
