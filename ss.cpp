@@ -74,7 +74,7 @@ void closeServSocks(int sig) {
 	exit(0);
 }
 
-void client(char *url, char *address, int port, int parentPort, int index, vector <Stone> &sstones) {
+ConInfo client(char *url, char *address, int port, int parentPort, int index, vector <Stone> &sstones) {
 	signal(SIGINT, closeServSocks);    //needed for catching '^C'
 //	int clientSock;
 	//int buffSize = 500;
@@ -130,7 +130,7 @@ void client(char *url, char *address, int port, int parentPort, int index, vecto
 		if (FD_ISSET(clientSock, &readfds)) {
 			ConInfo packet;
 			recv(clientSock, &packet, sizeof(packet), 0);
-
+			return packet;
 //			cout << "OUTPUT: " << packet.parentPort << endl;
 		}
 	}
@@ -278,8 +278,9 @@ void establishConnection() {
 			strcpy(addr, address.c_str());
 
 			//call client method here
-			client(packet.url, addr, port, atoi(PORT), randomNum, sstones);    //connect to new sstone
-
+			ConInfo ret = client(packet.url, addr, port, atoi(PORT), randomNum, sstones);    //connect to new sstone
+			
+			send(new_fd, &ret, sizeof(ret), 0);
 
 		} else {
 			cout << "got to last sstone" << endl;

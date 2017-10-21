@@ -79,6 +79,7 @@ void Awget::client(char *address, int port, int index) {
 	send(clientSock, &info, sizeof(info), 0);
 	ConInfo result;
 	recv(clientSock, &result, sizeof(result), 0);
+	cout << "MADE IT ALL THE WAY BACK LETS " << result.parentPort << endl;
 }
 
 //Drives awget application
