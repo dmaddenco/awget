@@ -95,7 +95,7 @@ void client(char *url, char *address, int port, int parentPort, int index, vecto
 	sstones.erase(sstones.begin() + index);
 	ConInfo info;
 	string temp = address;
-	info.parentPort = parentPort;
+//	info.parentPort = parentPort;
 //	info.selfPort = port;
 	strcpy(info.url, url);
 	strcpy(info.sstones, serialize(sstones).c_str());
@@ -217,7 +217,7 @@ void establishConnection() {
 		sstones = unpack(packet.sstones);
 
 		cout << "MY PARENTS IP IS: " << inIpAddress << endl;
-		cout << "MY PARENTS PORT IS: " << packet.parentPort << endl;
+//		cout << "MY PARENTS PORT IS: " << packet.parentPort << endl;
 
 		if (sstones.size() != 0) {
 			//find random stone to hop to again
