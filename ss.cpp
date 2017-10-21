@@ -66,8 +66,17 @@ string serialize(vector <Stone> sstones) {
 	return serStones;
 }
 
+void closeServSocks(int sig) {
+	FD_ZERO(&readfds);
+	close(clientSock);
+	close(new_fd);
+	close(sock_in);
+	exit(0);
+}
+
 void client(char *url, char *address, int port, int parentPort, int index, vector <Stone> &sstones) {
-	int clientSock;
+	signal(SIGINT, closeServSocks);    //needed for catching '^C'
+//	int clientSock;
 	//int buffSize = 500;
 	//char buff[buffSize];
 
@@ -91,6 +100,14 @@ void client(char *url, char *address, int port, int parentPort, int index, vecto
 		exit(EXIT_FAILURE);
 	}
 
+	FD_SET(clientSock, &readfds);
+	n = clientSock + 1;
+	tv.tv_sec = 3 * 60;
+	tv.tv_usec = 0;
+	//sv = select(n, &readfds, NULL, NULL, &tv);
+	//		cout << "MADE IT HERE" << endl;
+
+
 	cout << "Connected!" << endl;
 	sstones.erase(sstones.begin() + index);
 	ConInfo info;
@@ -99,7 +116,24 @@ void client(char *url, char *address, int port, int parentPort, int index, vecto
 //	info.selfPort = port;
 	strcpy(info.url, url);
 	strcpy(info.sstones, serialize(sstones).c_str());
+	//if (FD_ISSET(clientSock,&readfds)){
 	send(clientSock, &info, sizeof(info), 0);
+
+	sv = select(n, &readfds, NULL, NULL, &tv);
+	if (sv == -1) {
+		perror("select"); // error occurred in select()
+	} else if (sv == 0) {
+		printf("Timeout occurred!  No data after 10.5 seconds.\n");
+	} else {
+		cout << "HERE BITCHES" << endl;
+		// one or both of the descriptors have data
+		if (FD_ISSET(clientSock, &readfds)) {
+			recv(clientSock, buf1, sizeof buf1, 0);
+
+			cout << "BUF1: " << buf1 << endl;
+		}
+	}
+	//}
 }
 
 void *get_in_addr(struct sockaddr *sa) {
@@ -107,12 +141,6 @@ void *get_in_addr(struct sockaddr *sa) {
 		return &(((struct sockaddr_in *) sa)->sin_addr);
 	}
 	return &(((struct sockaddr_in6 *) sa)->sin6_addr);
-}
-
-void closeServSocks(int sig) {
-	close(new_fd);
-	close(sock_in);
-	exit(0);
 }
 
 int checkArguments(int argc, char *argv[]) {
@@ -147,15 +175,15 @@ int checkArguments(int argc, char *argv[]) {
 }
 
 void establishConnection() {
-	signal(SIGINT, closeServSocks);	//needed for catching '^C'
+	signal(SIGINT, closeServSocks);    //needed for catching '^C'
 
 	//sockaddr_in is for socket that a sstone will listen to for incoming connection
 	struct sockaddr_in servAddr;
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servAddr.sin_port = htons(atoi(PORT));	//PORT is the sstones own port to listen to
+	servAddr.sin_port = htons(atoi(PORT));    //PORT is the sstones own port to listen to
 
-	sock_in = socket(PF_INET, SOCK_STREAM, 0);	//incoming socket
+	sock_in = socket(PF_INET, SOCK_STREAM, 0);    //incoming socket
 
 	if (sock_in < 0) {
 		perror("socket fail");
@@ -172,11 +200,11 @@ void establishConnection() {
 		exit(EXIT_FAILURE);
 	}
 
-	struct hostent *he;	//for getting incoming connections ip address
+	struct hostent *he;    //for getting incoming connections ip address
 	struct in_addr **addr_list;
 	char hostname[128];
 
-	char inIpAddress[INET6_ADDRSTRLEN];	//stores incoming connections ip address
+	char inIpAddress[INET6_ADDRSTRLEN];    //stores incoming connections ip address
 
 	gethostname(hostname, sizeof hostname);
 	he = gethostbyname(hostname);
@@ -185,7 +213,7 @@ void establishConnection() {
 	cout << "My Ip Address: " << inet_ntoa(*addr_list[0]) << endl;
 	cout << "Listening to PORT: " << ntohs(servAddr.sin_port) << endl;
 
-	sockaddr_in their_addr;	//for connecting to incoming connections socket
+	sockaddr_in their_addr;    //for connecting to incoming connections socket
 	socklen_t sin_size = sizeof(their_addr);
 
 	vector <Stone> sstones; //will recieve this in struct from prior stone
@@ -193,7 +221,7 @@ void establishConnection() {
 	//accept connection
 	while (1) {
 		sin_size = sizeof their_addr;
-		new_fd = accept(sock_in, (struct sockaddr *) &their_addr, &sin_size);	//socket to recieve on
+		new_fd = accept(sock_in, (struct sockaddr *) &their_addr, &sin_size);    //socket to recieve on
 
 		if (new_fd == -1) {
 			perror("new socket fail");
@@ -217,9 +245,19 @@ void establishConnection() {
 		sstones = unpack(packet.sstones);
 
 		cout << "MY PARENTS IP IS: " << inIpAddress << endl;
-//		cout << "MY PARENTS PORT IS: " << packet.parentPort << endl;
+//################################################################################
+		FD_ZERO(&readfds);
+		FD_SET(sock_in, &readfds);
+		// n = new_fd;
+		// tv.tv_sec = 3*60;
+		// tv.tv_usec = 0;
+		// sv = select(n, &readfds, NULL, NULL, &tv);
+		// cout << "MADE IT HERE" << endl;
 
+//################################################################################
+		cout << "STONE SIZE: " << sstones.size() << endl;
 		if (sstones.size() != 0) {
+			cout << "SIZE ISNT 0" << endl;
 			//find random stone to hop to again
 			//pick random stone and obtain address and port
 			Stone temp;
@@ -239,7 +277,8 @@ void establishConnection() {
 			strcpy(addr, address.c_str());
 
 			//call client method here
-			client(packet.url, addr, port, atoi(PORT), randomNum, sstones);	//connect to new sstone
+			client(packet.url, addr, port, atoi(PORT), randomNum, sstones);    //connect to new sstone
+
 
 		} else {
 			cout << "got to last sstone" << endl;
@@ -252,6 +291,10 @@ void establishConnection() {
 				perror("wget error");
 				exit(EXIT_FAILURE);
 			}
+			//if (FD_ISSET(new_fd,&readfds)){
+			cout << "time to send things back" << endl;
+			//}
+			//send(clientSock, &info, sizeof(info), 0);
 			//get return address to last stone and send the downloaded file
 
 		}
