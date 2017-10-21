@@ -119,9 +119,10 @@ void client(char *url, char *address, int port, int parentPort, int index, vecto
 		cout << "HERE BITCHES" << endl;
 	// one or both of the descriptors have data
 	if (FD_ISSET(clientSock, &readfds)) {
-	recv(clientSock, buf1, sizeof buf1, 0);
+		ConInfo packet;
+	recv(clientSock, &packet, sizeof(packet), 0);
 	
-	cout << "BUF1: " << buf1 << endl;
+	cout << "OUTPUT: " << packet.parentPort << endl;
 	}
 	}
 	//}
@@ -281,16 +282,24 @@ void establishConnection() {
 		} else {
 			cout << "got to last sstone" << endl;
 			//go out and get URL
-			string url = packet.url;
-			string command = "wget -q " + url;
-			cout << command << endl;
-			int result = system(command.c_str());
-			if (result < 0) {
-				perror("wget error");
-				exit(EXIT_FAILURE);
-			}
+			//#############keepthis###############
+			// string url = packet.url;
+			// string command = "wget -q " + url;
+			// cout << command << endl;
+			// int result = system(command.c_str());
+			// if (result < 0) {
+				// perror("wget error");
+				// exit(EXIT_FAILURE);
+			// }
+			//###########keepthis###################
 			//if (FD_ISSET(new_fd,&readfds)){
 				cout << "time to send things back" << endl;
+				string temp = "SENDING THINGS PLACES!!!!";
+				strcpy(buf1,temp.c_str());
+				ConInfo test;
+				test.parentPort = 69;
+				send(new_fd, &test, sizeof(test), 0);
+			
 			//}
 			//send(clientSock, &info, sizeof(info), 0);
 			//get return address to last stone and send the downloaded file
