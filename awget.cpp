@@ -77,6 +77,8 @@ void Awget::client(char *address, int port, int index) {
 	strcpy(info.url, url.c_str());
 	strcpy(info.sstones, serialize().c_str());
 	send(clientSock, &info, sizeof(info), 0);
+	ConInfo result;
+	recv(clientSock, &result, sizeof(result), 0);
 }
 
 //Drives awget application
