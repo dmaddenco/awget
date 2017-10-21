@@ -58,12 +58,11 @@ struct Stone {
 };
 
 struct ConInfo {
-	int parentPort;
 	char url[MAX_URL_SIZE];
 	char sstones[MAX_SSTONES_SIZE];
 };
 
-struct ResultGet {
+struct ReturnPacket {
 	int numPackets;
 	int seqNum;
 	char parent[MAX_PACKET_SIZE];

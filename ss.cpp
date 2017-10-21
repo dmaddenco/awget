@@ -74,8 +74,9 @@ void closeServSocks(int sig) {
 	exit(0);
 }
 
-ConInfo client(char *url, char *address, int port, int parentPort, int index, vector <Stone> &sstones) {
+ReturnPacket client(char *url, char *address, int port, int parentPort, int index, vector <Stone> &sstones) {
 	signal(SIGINT, closeServSocks);    //needed for catching '^C'
+	ReturnPacket packet;
 //	int clientSock;
 	//int buffSize = 500;
 	//char buff[buffSize];
@@ -128,13 +129,13 @@ ConInfo client(char *url, char *address, int port, int parentPort, int index, ve
 		cout << "HERE BITCHES" << endl;
 		// one or both of the descriptors have data
 		if (FD_ISSET(clientSock, &readfds)) {
-			ConInfo packet;
 			recv(clientSock, &packet, sizeof(packet), 0);
 			return packet;
 //			cout << "OUTPUT: " << packet.parentPort << endl;
 		}
 	}
 	//}
+	return packet;
 }
 
 void *get_in_addr(struct sockaddr *sa) {
@@ -278,7 +279,7 @@ void establishConnection() {
 			strcpy(addr, address.c_str());
 
 			//call client method here
-			ConInfo ret = client(packet.url, addr, port, atoi(PORT), randomNum, sstones);    //connect to new sstone
+			ReturnPacket ret = client(packet.url, addr, port, atoi(PORT), randomNum, sstones);    //connect to new sstone
 			
 			send(new_fd, &ret, sizeof(ret), 0);
 
@@ -299,8 +300,8 @@ void establishConnection() {
 			cout << "time to send things back" << endl;
 			string temp = "SENDING THINGS PLACES!!!!";
 			strcpy(buf1, temp.c_str());
-			ConInfo test;
-			test.parentPort = 69;
+			ReturnPacket test;
+			test.numPackets = 69;
 			send(new_fd, &test, sizeof(test), 0);
 			//}
 			//send(clientSock, &info, sizeof(info), 0);

@@ -77,9 +77,9 @@ void Awget::client(char *address, int port, int index) {
 	strcpy(info.url, url.c_str());
 	strcpy(info.sstones, serialize().c_str());
 	send(clientSock, &info, sizeof(info), 0);
-	ConInfo result;
+	ReturnPacket result;
 	recv(clientSock, &result, sizeof(result), 0);
-	cout << "MADE IT ALL THE WAY BACK LETS " << result.parentPort << endl;
+	cout << "MADE IT ALL THE WAY BACK LETS " << result.numPackets << endl;
 }
 
 //Drives awget application
