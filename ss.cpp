@@ -4,6 +4,10 @@
 #include "awget.h"
 #include "ss.h"
 
+/*
+ * Takes in char array, creates vector of Stones
+ * Vector of Stones used for new connections
+ */
 vector <Stone> unpack(char chain[]) {
 	vector <string> tokens;
 	char *temp = strtok(chain, ",");
@@ -41,6 +45,10 @@ vector <Stone> unpack(char chain[]) {
 	return sstones;
 }
 
+/*
+ * Takes in vector of Stones and returns string
+ * String is [IP Address Port,IP Address Port...]
+ */
 string serialize(vector <Stone> sstones) {
 	string serStones;
 	int size = sstones.size();
@@ -53,6 +61,10 @@ string serialize(vector <Stone> sstones) {
 	return serStones;
 }
 
+/*
+ * Handels SIGINT
+ * Closes all open sockets
+ */
 void closeServSocks(int sig) {
 	FD_ZERO(&readfds);
 	close(clientSock);
@@ -61,6 +73,10 @@ void closeServSocks(int sig) {
 	exit(0);
 }
 
+/*
+ * Returns filename for sprintf
+ * If no file at end of url, "index.html" will be used
+ */
 string getFileName(string url) {
 	std::size_t found = url.find_last_of("/\\");
 	string file = url.substr(found + 1);
@@ -73,7 +89,10 @@ string getFileName(string url) {
 	}
 }
 
-
+/*
+ * Main program to create sockets and accept returning file
+ * cerr will print out any error messages
+ */
 ReturnPacket client(char *url, char *address, int port, int parentPort, int index, vector <Stone> &sstones) {
 	signal(SIGINT, closeServSocks);    //needed for catching '^C'
 	ReturnPacket packet;
@@ -150,10 +169,13 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 
 		}
 	}
-	//}
 	return packet;
 }
 
+/*
+ * Returns address information for socket struct
+ * Used for getting things like IP address
+ */
 void *get_in_addr(struct sockaddr *sa) {
 	if (sa->sa_family == AF_INET) {
 		return &(((struct sockaddr_in *) sa)->sin_addr);
@@ -161,6 +183,10 @@ void *get_in_addr(struct sockaddr *sa) {
 	return &(((struct sockaddr_in6 *) sa)->sin6_addr);
 }
 
+/*
+ * Argument checking for all passed arguments
+ * cerr will print appropriate error message
+ */
 int checkArguments(int argc, char *argv[]) {
 	//Argument Checking
 	//Are there too many arguments
@@ -192,6 +218,12 @@ int checkArguments(int argc, char *argv[]) {
 	return 0;
 }
 
+/*
+ * Will drive ss connection
+ * Create initial connection to either another sstone or to awget
+ * If no more sstones, will perform system "wget"
+ * Will send back file after wget
+ */
 void establishConnection() {
 	signal(SIGINT, closeServSocks);    //needed for catching '^C'
 

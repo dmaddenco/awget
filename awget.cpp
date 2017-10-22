@@ -6,6 +6,12 @@
 
 #include "awget.h"
 
+/*
+ * Reads file in and stores information inside Stone struct
+ * IP stored as string
+ * Port stored as int
+ * Vector sstones holds all stepping stones
+ */
 void Awget::readFile(ifstream &inFile) {
 	string line;
 	getline(inFile, line);
@@ -20,7 +26,11 @@ void Awget::readFile(ifstream &inFile) {
 	}
 }
 
-//Check if URL is valid
+/*
+ * Regex check for url
+ * Must begin with "www." or "https://"
+ * Returns true for valid regex, false otherwise
+ */
 bool Awget::isValid(string url) {
 	string urlPattern = "^((https?://)|^(www\\.))[^/\n]+(?:/[^\\/%\n]+)*(?:/?\?[^&\n]+(?:&[^&\n]+)*)?/?$";
 	regex reg(urlPattern);
@@ -32,6 +42,11 @@ bool Awget::isValid(string url) {
 	}
 }
 
+/*
+ * Creates string to store all sstone information
+ * String is [IP Address Port,IP Address Port...]
+ * Allows for sstone information to be sent over socket
+ */
 string Awget::serialize() {
 	string serStones;
 	int size = sstones.size();
@@ -44,6 +59,10 @@ string Awget::serialize() {
 	return serStones;
 }
 
+/*
+ * Returns filename for sprintf
+ * If no file at end of url, "index.html" will be used
+ */
 string getFileName(string url) {
 	std::size_t found = url.find_last_of("/\\");
 	string file = url.substr(found + 1);
@@ -56,6 +75,10 @@ string getFileName(string url) {
 	}
 }
 
+/*
+ * Main program to create sockets and accept returning file
+ * cerr will print out any error messages
+ */
 void Awget::client(char *address, int port, int index) {
 	int clientSock;
 
@@ -111,7 +134,10 @@ void Awget::client(char *address, int port, int index) {
 	
 }
 
-//Drives awget application
+/*
+ * Will pick a random stone to use in connection
+ * Will call client method to connect to sstone
+ */
 void Awget::initService() {
 	//pick random stone and obtain address and port
 	Stone temp;

@@ -5,8 +5,8 @@
 #ifndef AWGET_SS_H
 #define AWGET_SS_H
 
-#define MAXPENDING 10
-#define BUFSIZE 1024
+//#define MAXPENDING 10
+//#define BUFSIZE 1024
 
 char *PORT;
 int sock_in, clientSock;
