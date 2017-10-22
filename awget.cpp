@@ -58,8 +58,6 @@ string getFileName(string url) {
 
 void Awget::client(char *address, int port, int index) {
 	int clientSock;
-	//int buffSize = 500;
-	//char buff[buffSize];
 
 	clientSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (clientSock < 0) {
@@ -67,25 +65,21 @@ void Awget::client(char *address, int port, int index) {
 		exit(EXIT_FAILURE);
 	}
 
-//	cout << "Client socket created" << endl;
-
 	struct sockaddr_in ServAddr;
 	ServAddr.sin_family = AF_INET;
 	ServAddr.sin_addr.s_addr = inet_addr(address);
 	ServAddr.sin_port = htons(port);
 
-//	cout << "Connecting to server..." << endl;
 	if (connect(clientSock, (struct sockaddr *) &ServAddr, sizeof(ServAddr)) < 0) {
 		cerr << "ERROR IN CONNECT" << endl;
 		close(clientSock);
 		exit(EXIT_FAILURE);
 	}
 
-//	cout << "Connected!" << endl;
 	sstones.erase(sstones.begin() + index);
 	ConInfo info;
 	string temp = address;
-//	info.parentPort = AWGET_PORT;
+
 	strcpy(info.url, url.c_str());
 	strcpy(info.sstones, serialize().c_str());
 	send(clientSock, &info, sizeof(info), 0);
@@ -101,34 +95,20 @@ void Awget::client(char *address, int port, int index) {
 	}
 	ofstream myfile;
 	string fileName = getFileName(url);
-	cout << "file: " << fileName << endl;
 	myfile.open(fileName);
 
 	int file_size = atoi(buffer);
 	int remain_data = file_size;
 	int len;
 	while ((remain_data > 0) && ((len = recv(clientSock, buffer, BUFSIZE, 0)) > 0)) {
-		cout << "Remaining date to get: " << remain_data << endl;
 		myfile.write(buffer, len);
 		remain_data -= len;
 	}
-	cout << "FINISHED GETTING FILE!" << endl;
+	cout << "Received file: " << fileName << endl;
+	cout << "Goodbye!" << endl;
 
 	myfile.close();
-	//fclose(received_file);
-	// ReturnPacket result;
-	// recv(clientSock, &result, sizeof(result), 0);
-	// int packetsNeeded = result.numPackets - 1;
-	// cout << "need: " << packetsNeeded << endl;
-	// while (packetsNeeded != 0) {
-	// cout << "before recv" << endl;
-	// recv(clientSock, &result, sizeof(result), 0);
-	// cout << "after recv" << endl;
-	// packetsNeeded--;
-	// string message = result.file;
-	// cout << "message: " << message << endl;
-	// }
-	// cout << "MADE IT ALL THE WAY BACK LETS " << result.numPackets << endl;
+	
 }
 
 //Drives awget application
@@ -146,10 +126,11 @@ void Awget::initService() {
 
 	address = temp.addr;
 	port = temp.port;
+    
+    cout << "Next SS is: " << address << " " << port << endl;
+    cout << "Waiting for file..." << endl;
 	//convert string address to char * addr
 	strcpy(addr, address.c_str());
-	//call client method here
-	cout << "port to connect to: " << temp.port << endl;
 	client(addr, port, randomNum);
 }
 
@@ -162,6 +143,9 @@ int main(int argc, char *argv[]) {
 			cerr << "URL INVALID" << endl;
 			exit(EXIT_FAILURE);
 		}
+		
+		cout << "Request: " << awget.url << endl;
+		
 		//Read from local file "chaingang.txt"
 		ifstream reader("chaingang.txt");
 		if (!reader.good()) {
@@ -191,5 +175,11 @@ int main(int argc, char *argv[]) {
 		cerr << "DID NOT RECEIVE CORRECT ARGUMENTS" << endl;
 		exit(EXIT_FAILURE);
 	}
+	
+	cout << "Chainlist: " << endl;
+    for(unsigned int i = 0; i < awget.sstones.size(); i++){
+        cout << awget.sstones[i].addr << ", " << awget.sstones[i].port << endl;
+    }
+	
 	awget.initService();
 }

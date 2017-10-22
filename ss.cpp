@@ -8,11 +8,9 @@ vector <Stone> unpack(char chain[]) {
 	vector <string> tokens;
 	char *temp = strtok(chain, ",");
 	while (temp != NULL) {
-		//cout << temp << endl;
-		// char test[256];
+		
 		string hello = temp;
-		//cout << hello << endl;
-		// strcpy(test,tempc_str());
+		
 		tokens.push_back(hello);
 		temp = strtok(NULL, ",");
 	}
@@ -28,11 +26,9 @@ vector <Stone> unpack(char chain[]) {
 		Stone sstone;
 		while (temp != NULL) {
 			if (ip) {
-				// cout << "IP: " << temp << endl;
 				sstone.addr = temp;
 				ip = 0;
 			} else {
-				// cout << "PORT: " << temp << endl;
 				int change = atoi(temp);
 				sstone.port = change;
 				ip = 1;
@@ -41,16 +37,7 @@ vector <Stone> unpack(char chain[]) {
 			temp = strtok(NULL, " ");
 		}
 		sstones.push_back(sstone);
-		// cout << "NEXT" << endl;
 	}
-
-	// size = sstones.size();
-	// for (int i = 0; i < size; i++){
-	// cout << "IP: " << sstones[i].addr << endl;
-	// cout << "PORT: " << sstones[i].port << endl;
-	// cout << "NEXT" << endl;
-
-	// }
 	return sstones;
 }
 
@@ -90,9 +77,6 @@ string getFileName(string url) {
 ReturnPacket client(char *url, char *address, int port, int parentPort, int index, vector <Stone> &sstones) {
 	signal(SIGINT, closeServSocks);    //needed for catching '^C'
 	ReturnPacket packet;
-//	int clientSock;
-	//int buffSize = 500;
-	//char buff[buffSize];
 	char buffer[BUFSIZE];
 
 	clientSock = socket(AF_INET, SOCK_STREAM, 0);
@@ -101,14 +85,11 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 		exit(EXIT_FAILURE);
 	}
 
-//	cout << "Client socket created" << endl;
-
 	struct sockaddr_in ServAddr;
 	ServAddr.sin_family = AF_INET;
 	ServAddr.sin_addr.s_addr = inet_addr(address);
 	ServAddr.sin_port = htons(port);
-	cout << "trying to connect to: " << address << endl;
-//	cout << "Connecting to server..." << endl;
+	
 	if (connect(clientSock, (struct sockaddr *) &ServAddr, sizeof(ServAddr)) < 0) {
 		cout << "ERROR IN CONNECT" << endl;
 		close(clientSock);
@@ -119,19 +100,14 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 	n = clientSock + 1;
 	tv.tv_sec = 3 * 60;
 	tv.tv_usec = 0;
-	//sv = select(n, &readfds, NULL, NULL, &tv);
-	//		cout << "MADE IT HERE" << endl;
 
-
-	cout << "Connected!" << endl;
 	sstones.erase(sstones.begin() + index);
 	ConInfo info;
 	string temp = address;
-//	info.parentPort = parentPort;
-//	info.selfPort = port;
+
 	strcpy(info.url, url);
 	strcpy(info.sstones, serialize(sstones).c_str());
-	//if (FD_ISSET(clientSock,&readfds)){
+	
 	send(clientSock, &info, sizeof(info), 0);
 
 	sv = select(n, &readfds, NULL, NULL, &tv);
@@ -140,7 +116,6 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 	} else if (sv == 0) {
 		printf("Timeout occurred!  No data after 10.5 seconds.\n");
 	} else {
-		cout << "HERE BITCHES" << endl;
 		// one or both of the descriptors have data
 		if (FD_ISSET(clientSock, &readfds)) {
 			int recvd = -1;
@@ -161,7 +136,6 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 			int remain_data = file_size;
 			int len;
 			while ((remain_data > 0) && ((len = recv(clientSock, buffer, BUFSIZE, 0)) > 0)) {
-				cout << "Remaining date to get: " << remain_data << endl;
 
 				myfile.write(buffer, len);
 				if (remain_data < BUFSIZE) { remain_data = -1; }
@@ -169,20 +143,11 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 					remain_data -= len;
 				}
 				packnum--;
-				cout << "remain_data: " << remain_data << endl;
 			}
-			cout << "FINISHED GETTING FILE!" << endl;
 
 			myfile.close();
-			// recv(clientSock, buffer, BUFSIZE, 0);
-			// int file_size = atoi(buffer);
-			// int numPackets = (file_size/BUFSIZE)+1
-			// while (numPackets > 0){
-			// recv(clientSock, buffer, BUFSIZE, 0);
-
-			// }
 			return packet;
-//			cout << "OUTPUT: " << packet.parentPort << endl;
+
 		}
 	}
 	//}
@@ -262,10 +227,7 @@ void establishConnection() {
 	gethostname(hostname, sizeof hostname);
 	he = gethostbyname(hostname);
 	addr_list = (struct in_addr **) he->h_addr_list;
-
-	cout << "My Ip Address: " << inet_ntoa(*addr_list[0]) << endl;
-	cout << "Listening to PORT: " << ntohs(servAddr.sin_port) << endl;
-
+    
 	sockaddr_in their_addr;    //for connecting to incoming connections socket
 	socklen_t sin_size = sizeof(their_addr);
 
@@ -297,20 +259,18 @@ void establishConnection() {
 
 		sstones = unpack(packet.sstones);
 
-		cout << "MY PARENTS IP IS: " << inIpAddress << endl;
-//################################################################################
 		FD_ZERO(&readfds);
 		FD_SET(sock_in, &readfds);
-		// n = new_fd;
-		// tv.tv_sec = 3*60;
-		// tv.tv_usec = 0;
-		// sv = select(n, &readfds, NULL, NULL, &tv);
-		// cout << "MADE IT HERE" << endl;
+        
+        cout << "Request: " << packet.url << endl;
 
-//################################################################################
-		cout << "STONE SIZE: " << sstones.size() << endl;
 		if (sstones.size() != 0) {
-			cout << "SIZE ISNT 0" << endl;
+            
+            cout << "Chainlist: " << endl;
+            for(unsigned int i = 0; i < sstones.size(); i++){
+                cout << sstones[i].addr << ", " << sstones[i].port << endl;
+            }
+            
 			//find random stone to hop to again
 			//pick random stone and obtain address and port
 			Stone temp;
@@ -329,9 +289,11 @@ void establishConnection() {
 			//convert string address to char * addr
 			strcpy(addr, address.c_str());
 
+            cout << "Next SS is: " << address << " " << port << endl;
+            cout << "Waiting for file..." << endl;
+            
 			//call client method here
-			ReturnPacket ret = client(packet.url, addr, port, atoi(PORT), randomNum,
-									  sstones);    //connect to new sstone
+			client(packet.url, addr, port, atoi(PORT), randomNum,sstones);    //connect to new sstone
 
 			//send(new_fd, &ret, sizeof(ret), 0);
 			int fd = open(filename.c_str(), O_RDONLY);
@@ -346,9 +308,7 @@ void establishConnection() {
 				exit(EXIT_FAILURE);
 			}
 			sprintf(file_size, "%d", file_stat.st_size);
-			cout << "file size: " << file_size << endl;;
-			int size = (atoi(file_size) / BUFSIZE);
-			cout << "number of packets: " << size << endl;
+			//int size = (atoi(file_size) / BUFSIZE);
 			int len = send(new_fd, file_size, sizeof(file_size), 0);
 			if (len < 0) {
 				fprintf(stderr, "Error on sending file size\n");
@@ -360,28 +320,26 @@ void establishConnection() {
 			printf("Relaying file ...\n");
 
 			while (((sent_bytes = sendfile(new_fd, fd, &offset, BUFSIZE)) > 0) && (remain_data > 0)) {
-				cout << "Remaining date to send: " << remain_data << endl;
 				remain_data -= sent_bytes;
 			}
-			cout << "FINISHED SENDING FILE!" << endl;
+			cout << "Goodbye!" << endl;
 
 		} else {
-			cout << "got to last sstone" << endl;
-			//go out and get URL
-			//#############keepthis###############
+			cout << "Chainlist is empty" << endl;
+            
 			string url = packet.url;
 			string command = "wget -q " + url;
 			int result = system(command.c_str());
 			filename = getFileName(url);
+            
+            cout << "Issuing wget for file: " << filename << endl;
+            
 			if (result < 0) {
 				perror("wget error");
 				exit(EXIT_FAILURE);
 			}
-			//###########keepthis###################
-			//if (FD_ISSET(new_fd,&readfds)){
-			cout << "time to send things back" << endl;
-			cout << "fileName: " << filename << endl;
-			string temp = "SENDING THINGS PLACES!!!!";
+			
+			cout << "File received" << endl;
 
 			int fd = open(filename.c_str(), O_RDONLY);
 
@@ -395,9 +353,7 @@ void establishConnection() {
 				exit(EXIT_FAILURE);
 			}
 			sprintf(file_size, "%d", file_stat.st_size);
-			cout << "file size: " << file_size << endl;;
-			int size = (atoi(file_size) / BUFSIZE);
-			cout << "number of packets: " << size << endl;
+			//int size = (atoi(file_size) / BUFSIZE);
 			int len = send(new_fd, file_size, sizeof(file_size), 0);
 			if (len < 0) {
 				fprintf(stderr, "Error on sending file size\n");
@@ -409,41 +365,10 @@ void establishConnection() {
 			printf("Relaying file ...\n");
 
 			while (((sent_bytes = sendfile(new_fd, fd, &offset, BUFSIZE)) > 0) && (remain_data > 0)) {
-				cout << "Remaining date to send: " << remain_data << endl;
 				remain_data -= sent_bytes;
 			}
-			cout << "FINISHED SENDING FILE!" << endl;
-			// ReturnPacket test;
-			// if (sizeof(temp) > MAX_PACKET_SIZE) {
-			// test.numPackets = sizeof(temp) / MAX_PACKET_SIZE;
-			// cout << "ss numPackets: " << test.numPackets << endl;
-			// int packetSize = sizeof(temp) / test.numPackets;
-			// cout << "ss packetSize: " << packetSize << endl;
-			// int index = 0;
-			// cout << "index: " << index << endl;
-			// for (int i = 0; i < test.numPackets; ++i) {
-			// ReturnPacket partial;
-			// partial.seqNum = i;
-			// partial.numPackets = test.numPackets;
-			// if (index+packetSize > temp.length()) {
-			// strcpy(partial.file, temp.substr(index).c_str());
-			// } else {
-			// strcpy(partial.file, temp.substr(index, index + packetSize).c_str());
-			// index += packetSize;
-			// }
-			// cout << "index: " << index << endl;
-			// send(new_fd, &partial, sizeof(partial), 0);
-			// }
-			// } else {
-			// strcpy(test.file, temp.c_str());
-			// send(new_fd, &test, sizeof(test), 0);
-			// }
-
-
-			//}
-			//send(clientSock, &info, sizeof(info), 0);
-			//get return address to last stone and send the downloaded file
-
+			cout << "Goodbye!" << endl;
+			
 		}
 	}
 }
