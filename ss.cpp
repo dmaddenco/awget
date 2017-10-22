@@ -74,6 +74,19 @@ void closeServSocks(int sig) {
 	exit(0);
 }
 
+string getFileName(string url) {
+	std::size_t found = url.find_last_of("/\\");
+	string file = url.substr(found + 1);
+	string urlPattern = "^((https?://)|^(www\\.))[^/\n]+(?:/[^\\/%\n]+)*(?:/?\?[^&\n]+(?:&[^&\n]+)*)?/?$";
+	regex reg(urlPattern);
+	if (regex_match(file, reg) == true) {
+		return "index.html";
+	} else {
+		return file;
+	}
+}
+
+
 ReturnPacket client(char *url, char *address, int port, int parentPort, int index, vector <Stone> &sstones) {
 	signal(SIGINT, closeServSocks);    //needed for catching '^C'
 	ReturnPacket packet;
@@ -139,6 +152,8 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 				exit(EXIT_FAILURE);
 			}
 			ofstream myfile;
+			filename = getFileName(info.url);
+
 			myfile.open("index.html");
 
 			int file_size = atoi(buffer);
@@ -210,18 +225,6 @@ int checkArguments(int argc, char *argv[]) {
 		return -1;
 	}
 	return 0;
-}
-
-string getFileName(string url) {
-	std::size_t found = url.find_last_of("/\\");
-	string file = url.substr(found + 1);
-	string urlPattern = "^((https?://)|^(www\\.))[^/\n]+(?:/[^\\/%\n]+)*(?:/?\?[^&\n]+(?:&[^&\n]+)*)?/?$";
-	regex reg(urlPattern);
-	if (regex_match(file, reg) == true) {
-		return "index.html";
-	} else {
-		return file;
-	}
 }
 
 void establishConnection() {
