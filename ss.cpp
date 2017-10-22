@@ -146,11 +146,15 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 				int packnum = (file_size/BUFSIZE)+1;
 				int remain_data = file_size;
 				int len;
-				while(((len = recv(clientSock, buffer, BUFSIZE, 0)) > 0 ) && (remain_data > 0))
+				while((remain_data > 0) && ((len = recv(clientSock, buffer, BUFSIZE, 0)) > 0 ))
 				{
 				cout << "Remaining date to get: " << remain_data << endl;
+				
 				myfile.write(buffer,len);
+				if (remain_data < BUFSIZE){remain_data = -1;}
+				else{
 				remain_data -= len;
+				}
 				packnum--;
 				cout << "remain_data: " << remain_data << endl; 
 				}
