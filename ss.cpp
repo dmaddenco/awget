@@ -154,7 +154,7 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 			ofstream myfile;
 			filename = getFileName(info.url);
 
-			myfile.open("index.html");
+			myfile.open(filename);
 
 			int file_size = atoi(buffer);
 			int packnum = (file_size / BUFSIZE) + 1;
@@ -334,7 +334,7 @@ void establishConnection() {
 									  sstones);    //connect to new sstone
 
 			//send(new_fd, &ret, sizeof(ret), 0);
-			int fd = open("index.html", O_RDONLY);
+			int fd = open(filename.c_str(), O_RDONLY);
 
 			if (fd == -1) {
 				fprintf(stderr, "Error opening file\n");
