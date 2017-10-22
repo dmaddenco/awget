@@ -46,11 +46,21 @@ using std::regex_match;
 #include <unistd.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <sys/sendfile.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <iostream>
+#include <fstream>
 
-#define MAX_PACKET_SIZE 1400
+using std::ofstream;
+
+//#define MAX_PACKET_SIZE 1400
+#define MAX_PACKET_SIZE 10
 #define MAX_SSTONES_SIZE 1000
-#define MAX_URL_SIZE	200
-#define MAX_IP_SIZE	200
+#define MAX_URL_SIZE    200
+#define MAX_IP_SIZE    200
+#define BUFSIZE 1024
 
 struct Stone {
 	string addr;
@@ -58,12 +68,12 @@ struct Stone {
 };
 
 struct ConInfo {
-	int parentPort;	//port number of parent
 	char url[MAX_URL_SIZE];
 	char sstones[MAX_SSTONES_SIZE];
 };
 
-struct ResultGet {
+struct ReturnPacket {
+	int numPackets;
 	int seqNum;
 	char parent[MAX_PACKET_SIZE];
 	char file[MAX_PACKET_SIZE];
@@ -73,11 +83,16 @@ class Awget {
 public:
 	vector <Stone> sstones;
 	string url;
+
 	void readFile(ifstream &inFile);
+
 	bool isValid(string url);
-    void initService();
-    void client(char * address, int port, int index);
-    string serialize();
+
+	void initService();
+
+	void client(char *address, int port, int index);
+
+	string serialize();
 };
 
 #endif //AWGET_AWGET_H

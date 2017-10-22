@@ -44,6 +44,18 @@ string Awget::serialize() {
 	return serStones;
 }
 
+string getFileName(string url) {
+	std::size_t found = url.find_last_of("/\\");
+	string file = url.substr(found + 1);
+	string urlPattern = "^((https?://)|^(www\\.))[^/\n]+(?:/[^\\/%\n]+)*(?:/?\?[^&\n]+(?:&[^&\n]+)*)?/?$";
+	regex reg(urlPattern);
+	if (regex_match(file, reg) == true) {
+		return "index.html";
+	} else {
+		return file;
+	}
+}
+
 void Awget::client(char *address, int port, int index) {
 	int clientSock;
 	//int buffSize = 500;
@@ -77,6 +89,46 @@ void Awget::client(char *address, int port, int index) {
 	strcpy(info.url, url.c_str());
 	strcpy(info.sstones, serialize().c_str());
 	send(clientSock, &info, sizeof(info), 0);
+
+	char buffer[BUFSIZE];
+	int recvd = -1;
+	recvd = recv(clientSock, buffer, BUFSIZE, 0);
+
+	if (recvd < 0) {
+		fprintf(stderr, "Issue with recv \n");
+		printf("errno %d", errno);
+		exit(EXIT_FAILURE);
+	}
+	ofstream myfile;
+	string fileName = getFileName(url);
+	cout << "file: " << fileName << endl;
+	myfile.open(fileName);
+
+	int file_size = atoi(buffer);
+	int remain_data = file_size;
+	int len;
+	while ((remain_data > 0) && ((len = recv(clientSock, buffer, BUFSIZE, 0)) > 0)) {
+		cout << "Remaining date to get: " << remain_data << endl;
+		myfile.write(buffer, len);
+		remain_data -= len;
+	}
+	cout << "FINISHED GETTING FILE!" << endl;
+
+	myfile.close();
+	//fclose(received_file);
+	// ReturnPacket result;
+	// recv(clientSock, &result, sizeof(result), 0);
+	// int packetsNeeded = result.numPackets - 1;
+	// cout << "need: " << packetsNeeded << endl;
+	// while (packetsNeeded != 0) {
+	// cout << "before recv" << endl;
+	// recv(clientSock, &result, sizeof(result), 0);
+	// cout << "after recv" << endl;
+	// packetsNeeded--;
+	// string message = result.file;
+	// cout << "message: " << message << endl;
+	// }
+	// cout << "MADE IT ALL THE WAY BACK LETS " << result.numPackets << endl;
 }
 
 //Drives awget application
