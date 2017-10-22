@@ -288,43 +288,76 @@ void establishConnection() {
 			cout << "got to last sstone" << endl;
 			//go out and get URL
 			//#############keepthis###############
-			// string url = packet.url;
-			// string command = "wget -q " + url;
-			// cout << command << endl;
-			// int result = system(command.c_str());
-			// if (result < 0) {
-			// perror("wget error");
-			// exit(EXIT_FAILURE);
-			// }
+			string url = packet.url;
+			string command = "wget -q " + url;
+			cout << command << endl;
+			int result = system(command.c_str());
+			if (result < 0) {
+			perror("wget error");
+			exit(EXIT_FAILURE);
+			}
 			//###########keepthis###################
 			//if (FD_ISSET(new_fd,&readfds)){
 			cout << "time to send things back" << endl;
 			string temp = "SENDING THINGS PLACES!!!!";
-			ReturnPacket test;
-			if (sizeof(temp) > MAX_PACKET_SIZE) {
-				test.numPackets = sizeof(temp) / MAX_PACKET_SIZE;
-				cout << "ss numPackets: " << test.numPackets << endl;
-				int packetSize = sizeof(temp) / test.numPackets;
-				cout << "ss packetSize: " << packetSize << endl;
-				int index = 0;
-				cout << "index: " << index << endl;
-				for (int i = 0; i < test.numPackets; ++i) {
-					ReturnPacket partial;
-					partial.seqNum = i;
-					partial.numPackets = test.numPackets;
-					if (index+packetSize > temp.length()) {
-						strcpy(partial.file, temp.substr(index).c_str());
-					} else {
-						strcpy(partial.file, temp.substr(index, index + packetSize).c_str());
-						index += packetSize;
-					}
-					cout << "index: " << index << endl;
-					send(new_fd, &partial, sizeof(partial), 0);
-				}
-			} else {
-				strcpy(test.file, temp.c_str());
-				send(new_fd, &test, sizeof(test), 0);
+			
+			int	fd = open("index.html", O_RDONLY);
+
+			if(fd == -1)
+			{
+			fprintf(stderr, "Error opening file\n");
+			exit(EXIT_FAILURE);
 			}
+
+			if(fstat(fd, &file_stat) < 0)
+			{
+			fprintf(stderr, "Error pulling file stats.\n");
+			exit(EXIT_FAILURE);
+			}
+			sprintf(file_size, "%d", file_stat.st_size);
+			int len = send(new_fd, file_size, sizeof(file_size), 0);
+			if(len < 0)
+			{
+			fprintf(stderr, "Error on sending file size\n");
+			exit(EXIT_FAILURE);
+			}
+			offset = 0;
+			remain_data = file_stat.st_size;
+
+			printf("Relaying file ...\n");
+
+			while(((sent_bytes = sendfile(new_fd, fd, &offset, BUFSIZE)) > 0) && (remain_data > 0))
+			{
+				cout << "Remaining date to send: " << remain_data << endl;
+			remain_data -= sent_bytes;	
+			}
+			// ReturnPacket test;
+			// if (sizeof(temp) > MAX_PACKET_SIZE) {
+				// test.numPackets = sizeof(temp) / MAX_PACKET_SIZE;
+				// cout << "ss numPackets: " << test.numPackets << endl;
+				// int packetSize = sizeof(temp) / test.numPackets;
+				// cout << "ss packetSize: " << packetSize << endl;
+				// int index = 0;
+				// cout << "index: " << index << endl;
+				// for (int i = 0; i < test.numPackets; ++i) {
+					// ReturnPacket partial;
+					// partial.seqNum = i;
+					// partial.numPackets = test.numPackets;
+					// if (index+packetSize > temp.length()) {
+						// strcpy(partial.file, temp.substr(index).c_str());
+					// } else {
+						// strcpy(partial.file, temp.substr(index, index + packetSize).c_str());
+						// index += packetSize;
+					// }
+					// cout << "index: " << index << endl;
+					// send(new_fd, &partial, sizeof(partial), 0);
+				// }
+			// } else {
+				// strcpy(test.file, temp.c_str());
+				// send(new_fd, &test, sizeof(test), 0);
+			// }
+			
+			
 			//}
 			//send(clientSock, &info, sizeof(info), 0);
 			//get return address to last stone and send the downloaded file

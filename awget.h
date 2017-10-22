@@ -46,12 +46,21 @@ using std::regex_match;
 #include <unistd.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <sys/sendfile.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <iostream>
+#include <fstream>
+using std::ofstream;
 
 //#define MAX_PACKET_SIZE 1400
 #define MAX_PACKET_SIZE 10
 #define MAX_SSTONES_SIZE 1000
 #define MAX_URL_SIZE	200
 #define MAX_IP_SIZE	200
+#define BUFSIZE 1024
+
 
 struct Stone {
 	string addr;

@@ -77,19 +77,52 @@ void Awget::client(char *address, int port, int index) {
 	strcpy(info.url, url.c_str());
 	strcpy(info.sstones, serialize().c_str());
 	send(clientSock, &info, sizeof(info), 0);
-	ReturnPacket result;
-	recv(clientSock, &result, sizeof(result), 0);
-	int packetsNeeded = result.numPackets - 1;
-	cout << "need: " << packetsNeeded << endl;
-	while (packetsNeeded != 0) {
-		cout << "before recv" << endl;
-		recv(clientSock, &result, sizeof(result), 0);
-		cout << "after recv" << endl;
-		packetsNeeded--;
-		string message = result.file;
-		cout << "message: " << message << endl;
+	
+	char buffer[BUFSIZE];
+	int recvd = -1;
+	recvd = recv(clientSock, buffer, BUFSIZE, 0);
+
+	if( recvd < 0)
+	{
+		fprintf(stderr, "Issue with recv \n");
+		printf( "errno %d", errno);
+		exit(EXIT_FAILURE);
 	}
-	cout << "MADE IT ALL THE WAY BACK LETS " << result.numPackets << endl;
+	//FILE *received_file;
+	//received_file = fopen("index.html", "w");
+	//if(received_file == NULL)
+	//{
+	//	fprintf(stderr, "Failed to open file\n");
+	//}
+	ofstream myfile;
+	myfile.open("index.html");
+
+	int file_size = atoi(buffer);
+	int remain_data = file_size;
+	int len;
+	while(((len = recv(clientSock, buffer, BUFSIZE, 0)) > 0 ) && (remain_data > 0))
+	{
+		cout << "Remaining date to get: " << remain_data << endl;
+		myfile << buffer;
+		//fwrite(buffer, sizeof(char), len, received_file);
+		remain_data -= len;
+		//printf("Recieve %d bytes and we hope : - %d bytes\n",len, remain_data );
+	}
+	myfile.close();
+	//fclose(received_file);
+	// ReturnPacket result;
+	// recv(clientSock, &result, sizeof(result), 0);
+	// int packetsNeeded = result.numPackets - 1;
+	// cout << "need: " << packetsNeeded << endl;
+	// while (packetsNeeded != 0) {
+		// cout << "before recv" << endl;
+		// recv(clientSock, &result, sizeof(result), 0);
+		// cout << "after recv" << endl;
+		// packetsNeeded--;
+		// string message = result.file;
+		// cout << "message: " << message << endl;
+	// }
+	// cout << "MADE IT ALL THE WAY BACK LETS " << result.numPackets << endl;
 }
 
 //Drives awget application
