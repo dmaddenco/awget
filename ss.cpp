@@ -279,8 +279,9 @@ void establishConnection() {
 			strcpy(addr, address.c_str());
 
 			//call client method here
-			ReturnPacket ret = client(packet.url, addr, port, atoi(PORT), randomNum, sstones);    //connect to new sstone
-			
+			ReturnPacket ret = client(packet.url, addr, port, atoi(PORT), randomNum,
+									  sstones);    //connect to new sstone
+
 			send(new_fd, &ret, sizeof(ret), 0);
 
 		} else {
@@ -299,10 +300,31 @@ void establishConnection() {
 			//if (FD_ISSET(new_fd,&readfds)){
 			cout << "time to send things back" << endl;
 			string temp = "SENDING THINGS PLACES!!!!";
-			strcpy(buf1, temp.c_str());
 			ReturnPacket test;
-			test.numPackets = 69;
-			send(new_fd, &test, sizeof(test), 0);
+			if (sizeof(temp) > MAX_PACKET_SIZE) {
+				test.numPackets = sizeof(temp) / MAX_PACKET_SIZE;
+				cout << "ss numPackets: " << test.numPackets << endl;
+				int packetSize = sizeof(temp) / test.numPackets;
+				cout << "ss packetSize: " << packetSize << endl;
+				int index = 0;
+				cout << "index: " << index << endl;
+				for (int i = 0; i < test.numPackets; ++i) {
+					ReturnPacket partial;
+					partial.seqNum = i;
+					partial.numPackets = test.numPackets;
+					if (index+packetSize > temp.length()) {
+						strcpy(partial.file, temp.substr(index).c_str());
+					} else {
+						strcpy(partial.file, temp.substr(index, index + packetSize).c_str());
+						index += packetSize;
+					}
+					cout << "index: " << index << endl;
+					send(new_fd, &partial, sizeof(partial), 0);
+				}
+			} else {
+				strcpy(test.file, temp.c_str());
+				send(new_fd, &test, sizeof(test), 0);
+			}
 			//}
 			//send(clientSock, &info, sizeof(info), 0);
 			//get return address to last stone and send the downloaded file

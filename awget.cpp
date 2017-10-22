@@ -79,6 +79,16 @@ void Awget::client(char *address, int port, int index) {
 	send(clientSock, &info, sizeof(info), 0);
 	ReturnPacket result;
 	recv(clientSock, &result, sizeof(result), 0);
+	int packetsNeeded = result.numPackets - 1;
+	cout << "need: " << packetsNeeded << endl;
+	while (packetsNeeded != 0) {
+		cout << "before recv" << endl;
+		recv(clientSock, &result, sizeof(result), 0);
+		cout << "after recv" << endl;
+		packetsNeeded--;
+		string message = result.file;
+		cout << "message: " << message << endl;
+	}
 	cout << "MADE IT ALL THE WAY BACK LETS " << result.numPackets << endl;
 }
 

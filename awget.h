@@ -47,7 +47,8 @@ using std::regex_match;
 #include <netdb.h>
 #include <arpa/inet.h>
 
-#define MAX_PACKET_SIZE 1400
+//#define MAX_PACKET_SIZE 1400
+#define MAX_PACKET_SIZE 10
 #define MAX_SSTONES_SIZE 1000
 #define MAX_URL_SIZE	200
 #define MAX_IP_SIZE	200
