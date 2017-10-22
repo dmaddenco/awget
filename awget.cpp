@@ -44,6 +44,18 @@ string Awget::serialize() {
 	return serStones;
 }
 
+string getFileName(string url) {
+	std::size_t found = url.find_last_of("/\\");
+	string file = url.substr(found+1);
+	string urlPattern = "^((https?://)|^(www\\.))[^/\n]+(?:/[^\\/%\n]+)*(?:/?\?[^&\n]+(?:&[^&\n]+)*)?/?$";
+	regex reg(urlPattern);
+	if (regex_match(file, reg) == true) {
+		return "index.html";
+	} else {
+		return file;
+	}
+}
+
 void Awget::client(char *address, int port, int index) {
 	int clientSock;
 	//int buffSize = 500;
@@ -95,7 +107,9 @@ void Awget::client(char *address, int port, int index) {
 	//	fprintf(stderr, "Failed to open file\n");
 	//}
 	ofstream myfile;
-	myfile.open("index.html");
+	string fileName = getFileName(url);
+	cout << "file: " << fileName << endl;
+	myfile.open(fileName);
 
 	int file_size = atoi(buffer);
 	int remain_data = file_size;

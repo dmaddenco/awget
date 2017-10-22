@@ -61,7 +61,6 @@ using std::ofstream;
 #define MAX_IP_SIZE	200
 #define BUFSIZE 1024
 
-
 struct Stone {
 	string addr;
 	int port;
