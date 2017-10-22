@@ -100,12 +100,6 @@ void Awget::client(char *address, int port, int index) {
 		printf( "errno %d", errno);
 		exit(EXIT_FAILURE);
 	}
-	//FILE *received_file;
-	//received_file = fopen("index.html", "w");
-	//if(received_file == NULL)
-	//{
-	//	fprintf(stderr, "Failed to open file\n");
-	//}
 	ofstream myfile;
 	string fileName = getFileName(url);
 	cout << "file: " << fileName << endl;
@@ -117,11 +111,11 @@ void Awget::client(char *address, int port, int index) {
 	while(((len = recv(clientSock, buffer, BUFSIZE, 0)) > 0 ) && (remain_data > 0))
 	{
 		cout << "Remaining date to get: " << remain_data << endl;
-		myfile << buffer;
-		//fwrite(buffer, sizeof(char), len, received_file);
+		myfile.write(buffer,len);
 		remain_data -= len;
-		//printf("Recieve %d bytes and we hope : - %d bytes\n",len, remain_data );
 	}
+	cout << "FINISHED GETTING FILE!" << endl;
+
 	myfile.close();
 	//fclose(received_file);
 	// ReturnPacket result;
