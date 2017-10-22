@@ -130,39 +130,37 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 		cout << "HERE BITCHES" << endl;
 		// one or both of the descriptors have data
 		if (FD_ISSET(clientSock, &readfds)) {
-				int recvd = -1;
-				recvd = recv(clientSock, buffer, BUFSIZE, 0);
+			int recvd = -1;
+			recvd = recv(clientSock, buffer, BUFSIZE, 0);
 
-				if( recvd < 0)
-				{
+			if (recvd < 0) {
 				fprintf(stderr, "Issue with recv \n");
-				printf( "errno %d", errno);
+				printf("errno %d", errno);
 				exit(EXIT_FAILURE);
-				}
-				ofstream myfile;
-				myfile.open("index.html");
+			}
+			ofstream myfile;
+			myfile.open(filename);
 
-				int file_size = atoi(buffer);
-				int packnum = (file_size/BUFSIZE)+1;
-				int remain_data = file_size;
-				int len;
-				while(((len = recv(clientSock, buffer, BUFSIZE, 0)) > 0 ) && (remain_data > 0))
-				{
+			int file_size = atoi(buffer);
+			int packnum = (file_size / BUFSIZE) + 1;
+			int remain_data = file_size;
+			int len;
+			while (((len = recv(clientSock, buffer, BUFSIZE, 0)) > 0) && (remain_data > 0)) {
 				cout << "Remaining date to get: " << remain_data << endl;
-				myfile.write(buffer,len);
+				myfile.write(buffer, len);
 				remain_data -= len;
 				packnum--;
-				cout << "remain_data: " << remain_data << endl; 
-				}
-				cout << "FINISHED GETTING FILE!" << endl;
+				cout << "remain_data: " << remain_data << endl;
+			}
+			cout << "FINISHED GETTING FILE!" << endl;
 
-				myfile.close();
+			myfile.close();
 			// recv(clientSock, buffer, BUFSIZE, 0);
 			// int file_size = atoi(buffer);
 			// int numPackets = (file_size/BUFSIZE)+1
 			// while (numPackets > 0){
-				// recv(clientSock, buffer, BUFSIZE, 0);
-				
+			// recv(clientSock, buffer, BUFSIZE, 0);
+
 			// }
 			return packet;
 //			cout << "OUTPUT: " << packet.parentPort << endl;
@@ -212,7 +210,7 @@ int checkArguments(int argc, char *argv[]) {
 
 string getFileName(string url) {
 	std::size_t found = url.find_last_of("/\\");
-	string file = url.substr(found+1);
+	string file = url.substr(found + 1);
 	string urlPattern = "^((https?://)|^(www\\.))[^/\n]+(?:/[^\\/%\n]+)*(?:/?\?[^&\n]+(?:&[^&\n]+)*)?/?$";
 	regex reg(urlPattern);
 	if (regex_match(file, reg) == true) {
@@ -329,60 +327,7 @@ void establishConnection() {
 									  sstones);    //connect to new sstone
 
 			//send(new_fd, &ret, sizeof(ret), 0);
-			int	fd = open("index.html", O_RDONLY);
-
-			if(fd == -1)
-			{
-			fprintf(stderr, "Error opening file\n");
-			exit(EXIT_FAILURE);
-			}
-
-			if(fstat(fd, &file_stat) < 0)
-			{
-			fprintf(stderr, "Error pulling file stats.\n");
-			exit(EXIT_FAILURE);
-			}
-			sprintf(file_size, "%d", file_stat.st_size);
-			cout << "file size: " << file_size << endl;;
-			int size = (atoi(file_size)/BUFSIZE);
-			cout << "number of packets: " <<  size << endl;
-			int len = send(new_fd, file_size, sizeof(file_size), 0);
-			if(len < 0)
-			{
-			fprintf(stderr, "Error on sending file size\n");
-			exit(EXIT_FAILURE);
-			}
-			offset = 0;
-			remain_data = file_stat.st_size;
-
-			printf("Relaying file ...\n");
-
-			while(((sent_bytes = sendfile(new_fd, fd, &offset, BUFSIZE)) > 0) && (remain_data > 0))
-			{
-				cout << "Remaining date to send: " << remain_data << endl;
-			remain_data -= sent_bytes;	
-			}
-			cout << "FINISHED SENDING FILE!" << endl;
-
-		} else {
-			cout << "got to last sstone" << endl;
-			//go out and get URL
-			//#############keepthis###############
-			string url = packet.url;
-			string command = "wget -q " + url;
-			int result = system(command.c_str());
-			string fileName = getFileName(url);
-			if (result < 0) {
-				perror("wget error");
-				exit(EXIT_FAILURE);
-			}
-			//###########keepthis###################
-			//if (FD_ISSET(new_fd,&readfds)){
-			cout << "time to send things back" << endl;
-			cout << "fileName: " << fileName << endl;
-			string temp = "SENDING THINGS PLACES!!!!";
-
-			int fd = open(fileName.c_str(), O_RDONLY);
+			int fd = open("index.html", O_RDONLY);
 
 			if (fd == -1) {
 				fprintf(stderr, "Error opening file\n");
@@ -395,8 +340,57 @@ void establishConnection() {
 			}
 			sprintf(file_size, "%d", file_stat.st_size);
 			cout << "file size: " << file_size << endl;;
-			int size = (atoi(file_size)/BUFSIZE);
-			cout << "number of packets: " <<  size << endl;
+			int size = (atoi(file_size) / BUFSIZE);
+			cout << "number of packets: " << size << endl;
+			int len = send(new_fd, file_size, sizeof(file_size), 0);
+			if (len < 0) {
+				fprintf(stderr, "Error on sending file size\n");
+				exit(EXIT_FAILURE);
+			}
+			offset = 0;
+			remain_data = file_stat.st_size;
+
+			printf("Relaying file ...\n");
+
+			while (((sent_bytes = sendfile(new_fd, fd, &offset, BUFSIZE)) > 0) && (remain_data > 0)) {
+				cout << "Remaining date to send: " << remain_data << endl;
+				remain_data -= sent_bytes;
+			}
+			cout << "FINISHED SENDING FILE!" << endl;
+
+		} else {
+			cout << "got to last sstone" << endl;
+			//go out and get URL
+			//#############keepthis###############
+			string url = packet.url;
+			string command = "wget -q " + url;
+			int result = system(command.c_str());
+			filename = getFileName(url);
+			if (result < 0) {
+				perror("wget error");
+				exit(EXIT_FAILURE);
+			}
+			//###########keepthis###################
+			//if (FD_ISSET(new_fd,&readfds)){
+			cout << "time to send things back" << endl;
+			cout << "fileName: " << filename << endl;
+			string temp = "SENDING THINGS PLACES!!!!";
+
+			int fd = open(filename.c_str(), O_RDONLY);
+
+			if (fd == -1) {
+				fprintf(stderr, "Error opening file\n");
+				exit(EXIT_FAILURE);
+			}
+
+			if (fstat(fd, &file_stat) < 0) {
+				fprintf(stderr, "Error pulling file stats.\n");
+				exit(EXIT_FAILURE);
+			}
+			sprintf(file_size, "%d", file_stat.st_size);
+			cout << "file size: " << file_size << endl;;
+			int size = (atoi(file_size) / BUFSIZE);
+			cout << "number of packets: " << size << endl;
 			int len = send(new_fd, file_size, sizeof(file_size), 0);
 			if (len < 0) {
 				fprintf(stderr, "Error on sending file size\n");

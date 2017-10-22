@@ -52,13 +52,14 @@ using std::regex_match;
 #include <fcntl.h>
 #include <iostream>
 #include <fstream>
+
 using std::ofstream;
 
 //#define MAX_PACKET_SIZE 1400
 #define MAX_PACKET_SIZE 10
 #define MAX_SSTONES_SIZE 1000
-#define MAX_URL_SIZE	200
-#define MAX_IP_SIZE	200
+#define MAX_URL_SIZE    200
+#define MAX_IP_SIZE    200
 #define BUFSIZE 1024
 
 struct Stone {
@@ -82,11 +83,16 @@ class Awget {
 public:
 	vector <Stone> sstones;
 	string url;
+
 	void readFile(ifstream &inFile);
+
 	bool isValid(string url);
-    void initService();
-    void client(char * address, int port, int index);
-    string serialize();
+
+	void initService();
+
+	void client(char *address, int port, int index);
+
+	string serialize();
 };
 
 #endif //AWGET_AWGET_H
