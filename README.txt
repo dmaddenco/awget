@@ -1,5 +1,5 @@
 CS457 - awget
-Andy Thai, Collin Kinchen, David Madden
+Andy Thai 830276315, Collin Kinchen 830257569, David Madden 830338902
 
 The following awget and ss application was written, compiled, and tested by Andy Thai, Collin Kinchen, and David Madden.
 The purpose of this application is to send a file request through multiple hosts to retrieve the file

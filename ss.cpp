@@ -146,7 +146,7 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 			}
 
 			ofstream myfile;    //myfile will be for sending/receiving file
-			filename = getFileName(info.url);
+//			filename = getFileName(info.url);
 
 			myfile.open(filename);
 
@@ -164,8 +164,8 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 			}
 
 			myfile.close();
-			return packet;
 
+			return packet;
 		}
 	}
 	return packet;
@@ -248,15 +248,11 @@ void establishConnection() {
 		exit(EXIT_FAILURE);
 	}
 
-//	struct hostent *he;    //for getting incoming connections ip address
-//	struct in_addr **addr_list;
 	char hostname[128];
 
 	char inIpAddress[INET6_ADDRSTRLEN];    //stores incoming connections ip address
 
-	gethostname(hostname, sizeof hostname);
-//	he = gethostbyname(hostname);
-//	addr_list = (struct in_addr **) he->h_addr_list;
+	gethostname(hostname, sizeof hostname);\
 
 	sockaddr_in their_addr;    //for connecting to incoming connections socket
 	socklen_t sin_size = sizeof(their_addr);
@@ -348,6 +344,9 @@ void establishConnection() {
 				remain_data -= sent_bytes;
 			}
 
+			string rmCommand = "rm " + filename;	//removes temp file to ensure file makes it back to awget
+			system(rmCommand.c_str());
+
 		} else {
 			cout << "Chainlist is empty" << endl;
 
@@ -393,6 +392,8 @@ void establishConnection() {
 			}
 			cout << "Goodbye!" << endl;
 
+			string rmCommand = "rm " + filename;	//removes temp file to ensure file makes it back to awget
+			system(rmCommand.c_str());
 		}
 	}
 }
