@@ -19,6 +19,6 @@ off_t offset;
 int remain_data;
 int sent_bytes = 0;
 char file_size[256];
-string filename = "tempFile";
+string filename;
 
 #endif //AWGET_SS_H

@@ -146,7 +146,7 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 			}
 
 			ofstream myfile;    //myfile will be for sending/receiving file
-//			filename = getFileName(info.url);
+			filename = getFileName(info.url);
 
 			myfile.open(filename);
 
