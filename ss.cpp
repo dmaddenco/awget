@@ -10,35 +10,33 @@
  */
 vector <Stone> unpack(char chain[]) {
 	vector <string> tokens;
-	char *temp = strtok(chain, ",");
-	while (temp != NULL) {
-		
-		string hello = temp;
-		
-		tokens.push_back(hello);
-		temp = strtok(NULL, ",");
+	char *toke = strtok(chain, ",");
+	//iterate over tokenated string to add to vector
+	while (toke != NULL) {
+		string s = toke;
+		tokens.push_back(s);
+		toke = strtok(NULL, ",");
 	}
-
 	int size = tokens.size();
 	vector <Stone> sstones;
 	for (int i = 0; i < size; i++) {
 		string index = tokens[i];
-		char test[256];
-		strcpy(test, index.c_str());
-		char *temp = strtok(test, " ");
+		char placeHolder[256];    //string is copied into to be tokenized
+		strcpy(placeHolder, index.c_str());
+		char *token = strtok(placeHolder, " ");    //tokenize for Ip address and Port number
 		int ip = 1;
 		Stone sstone;
-		while (temp != NULL) {
+		//set Ip address and port number
+		while (token != NULL) {
 			if (ip) {
-				sstone.addr = temp;
+				sstone.addr = token;
 				ip = 0;
 			} else {
-				int change = atoi(temp);
+				int change = atoi(token);
 				sstone.port = change;
 				ip = 1;
 			}
-
-			temp = strtok(NULL, " ");
+			token = strtok(NULL, " ");
 		}
 		sstones.push_back(sstone);
 	}
@@ -53,6 +51,7 @@ string serialize(vector <Stone> sstones) {
 	string serStones;
 	int size = sstones.size();
 	for (int i = 0; i < size; ++i) {
+		//serStones will be "IpAddress PortNumber"
 		serStones += (sstones[i].addr + " " + to_string(sstones[i].port));
 		if (i != size - 1) {
 			serStones += ",";
@@ -66,7 +65,7 @@ string serialize(vector <Stone> sstones) {
  * Closes all open sockets
  */
 void closeServSocks(int sig) {
-	FD_ZERO(&readfds);
+	FD_ZERO(&readfds);    //clear fd set
 	close(clientSock);
 	close(new_fd);
 	close(sock_in);
@@ -78,14 +77,14 @@ void closeServSocks(int sig) {
  * If no file at end of url, "index.html" will be used
  */
 string getFileName(string url) {
-	std::size_t found = url.find_last_of("/\\");
+	std::size_t found = url.find_last_of("/\\");    //last instance of "/"
 	string file = url.substr(found + 1);
 	string urlPattern = "^((https?://)|^(www\\.))[^/\n]+(?:/[^\\/%\n]+)*(?:/?\?[^&\n]+(?:&[^&\n]+)*)?/?$";
 	regex reg(urlPattern);
 	if (regex_match(file, reg) == true) {
-		return "index.html";
+		return "index.html";    //if url does not have file name extension, file name will be "index.html"
 	} else {
-		return file;
+		return file;    //file name will be whatever is after last "/" in url
 	}
 }
 
@@ -98,40 +97,40 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 	ReturnPacket packet;
 	char buffer[BUFSIZE];
 
-	clientSock = socket(AF_INET, SOCK_STREAM, 0);
+	clientSock = socket(AF_INET, SOCK_STREAM, 0);    //socket for outgoing information
 	if (clientSock < 0) {
 		cerr << "ERROR CREATING CLIENT SOCKET" << endl;
 		exit(EXIT_FAILURE);
 	}
 
-	struct sockaddr_in ServAddr;
+	struct sockaddr_in ServAddr;    //socket for incoming connection
 	ServAddr.sin_family = AF_INET;
 	ServAddr.sin_addr.s_addr = inet_addr(address);
 	ServAddr.sin_port = htons(port);
-	
+
 	if (connect(clientSock, (struct sockaddr *) &ServAddr, sizeof(ServAddr)) < 0) {
 		cout << "ERROR IN CONNECT" << endl;
 		close(clientSock);
 		exit(EXIT_FAILURE);
 	}
 
-	FD_SET(clientSock, &readfds);
-	n = clientSock + 1;
+	FD_SET(clientSock, &readfds);    //fd_set to hold two file descriptors for select
+	n = clientSock + 1;    //select fd to use
 	tv.tv_sec = 3 * 60;
 	tv.tv_usec = 0;
 
-	sstones.erase(sstones.begin() + index);
+	sstones.erase(sstones.begin() + index);    //remove stone to not be used for another connection
 	ConInfo info;
 	string temp = address;
 
 	strcpy(info.url, url);
 	strcpy(info.sstones, serialize(sstones).c_str());
-	
+
 	send(clientSock, &info, sizeof(info), 0);
 
 	sv = select(n, &readfds, NULL, NULL, &tv);
 	if (sv == -1) {
-		perror("select"); // error occurred in select()
+		perror("select");
 	} else if (sv == 0) {
 		printf("Timeout occurred!  No data after 10.5 seconds.\n");
 	} else {
@@ -145,7 +144,8 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 				printf("errno %d", errno);
 				exit(EXIT_FAILURE);
 			}
-			ofstream myfile;
+
+			ofstream myfile;    //myfile will be for sending/receiving file
 			filename = getFileName(info.url);
 
 			myfile.open(filename);
@@ -155,8 +155,7 @@ ReturnPacket client(char *url, char *address, int port, int parentPort, int inde
 			int remain_data = file_size;
 			int len;
 			while ((remain_data > 0) && ((len = recv(clientSock, buffer, BUFSIZE, 0)) > 0)) {
-
-				myfile.write(buffer, len);
+				myfile.write(buffer, len);    //write file information to file from buffer
 				if (remain_data < BUFSIZE) { remain_data = -1; }
 				else {
 					remain_data -= len;
@@ -188,7 +187,6 @@ void *get_in_addr(struct sockaddr *sa) {
  * cerr will print appropriate error message
  */
 int checkArguments(int argc, char *argv[]) {
-	//Argument Checking
 	//Are there too many arguments
 	if (argc > 3) {
 		cerr << "Too many arguments given " << endl;
@@ -259,7 +257,7 @@ void establishConnection() {
 	gethostname(hostname, sizeof hostname);
 	he = gethostbyname(hostname);
 	addr_list = (struct in_addr **) he->h_addr_list;
-    
+
 	sockaddr_in their_addr;    //for connecting to incoming connections socket
 	socklen_t sin_size = sizeof(their_addr);
 
@@ -281,28 +279,27 @@ void establishConnection() {
 
 		int numbytes;
 
-		//recieve packet
-		ConInfo packet;
+		ConInfo packet;    //recieve packet
 
 		if ((numbytes = recv(new_fd, &packet, sizeof(packet), 0)) == -1) {
 			perror("recv");
 			exit(EXIT_FAILURE);
 		}
 
-		sstones = unpack(packet.sstones);
+		sstones = unpack(packet.sstones); //will now have all sstone listed in string
 
-		FD_ZERO(&readfds);
+		FD_ZERO(&readfds);    //clear fd_set
 		FD_SET(sock_in, &readfds);
-        
-        cout << "Request: " << packet.url << endl;
+
+		cout << "Request: " << packet.url << endl;
 
 		if (sstones.size() != 0) {
-            
-            cout << "Chainlist: " << endl;
-            for(unsigned int i = 0; i < sstones.size(); i++){
-                cout << sstones[i].addr << ", " << sstones[i].port << endl;
-            }
-            
+
+			cout << "Chainlist: " << endl;
+			for (unsigned int i = 0; i < sstones.size(); i++) {
+				cout << sstones[i].addr << ", " << sstones[i].port << endl;
+			}
+
 			//find random stone to hop to again
 			//pick random stone and obtain address and port
 			Stone temp;
@@ -318,16 +315,13 @@ void establishConnection() {
 			address = temp.addr;
 			port = temp.port;
 
-			//convert string address to char * addr
-			strcpy(addr, address.c_str());
+			strcpy(addr, address.c_str());    //convert string address to char * addr
 
-            cout << "Next SS is: " << address << " " << port << endl;
-            cout << "Waiting for file..." << endl;
-            
-			//call client method here
-			client(packet.url, addr, port, atoi(PORT), randomNum,sstones);    //connect to new sstone
+			cout << "Next SS is: " << address << " " << port << endl;
+			cout << "Waiting for file..." << endl;
 
-			//send(new_fd, &ret, sizeof(ret), 0);
+			client(packet.url, addr, port, atoi(PORT), randomNum, sstones);    //connect to new sstone
+
 			int fd = open(filename.c_str(), O_RDONLY);
 
 			if (fd == -1) {
@@ -340,7 +334,6 @@ void establishConnection() {
 				exit(EXIT_FAILURE);
 			}
 			sprintf(file_size, "%d", file_stat.st_size);
-			//int size = (atoi(file_size) / BUFSIZE);
 			int len = send(new_fd, file_size, sizeof(file_size), 0);
 			if (len < 0) {
 				fprintf(stderr, "Error on sending file size\n");
@@ -354,26 +347,25 @@ void establishConnection() {
 			while (((sent_bytes = sendfile(new_fd, fd, &offset, BUFSIZE)) > 0) && (remain_data > 0)) {
 				remain_data -= sent_bytes;
 			}
-			cout << "Goodbye!" << endl;
 
 		} else {
 			cout << "Chainlist is empty" << endl;
-            
+
 			string url = packet.url;
 			string command = "wget -q " + url;
-			int result = system(command.c_str());
+			int result = system(command.c_str());    //for error status
 			filename = getFileName(url);
-            
-            cout << "Issuing wget for file: " << filename << endl;
-            
+
+			cout << "Issuing wget for file: " << filename << endl;
+
 			if (result < 0) {
 				perror("wget error");
 				exit(EXIT_FAILURE);
 			}
-			
+
 			cout << "File received" << endl;
 
-			int fd = open(filename.c_str(), O_RDONLY);
+			int fd = open(filename.c_str(), O_RDONLY);    //open file, int for error status
 
 			if (fd == -1) {
 				fprintf(stderr, "Error opening file\n");
@@ -385,8 +377,7 @@ void establishConnection() {
 				exit(EXIT_FAILURE);
 			}
 			sprintf(file_size, "%d", file_stat.st_size);
-			//int size = (atoi(file_size) / BUFSIZE);
-			int len = send(new_fd, file_size, sizeof(file_size), 0);
+			int len = send(new_fd, file_size, sizeof(file_size), 0);    //send on outgoing socket, int for error status
 			if (len < 0) {
 				fprintf(stderr, "Error on sending file size\n");
 				exit(EXIT_FAILURE);
@@ -396,11 +387,12 @@ void establishConnection() {
 
 			printf("Relaying file ...\n");
 
+			//continually send until no data left to send
 			while (((sent_bytes = sendfile(new_fd, fd, &offset, BUFSIZE)) > 0) && (remain_data > 0)) {
 				remain_data -= sent_bytes;
 			}
 			cout << "Goodbye!" << endl;
-			
+
 		}
 	}
 }
@@ -411,8 +403,7 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	//open socket for SS server to listen on
-	PORT = argv[2];
+	PORT = argv[2];    //open socket for SS server to listen on
 
 	establishConnection();
 
