@@ -248,15 +248,15 @@ void establishConnection() {
 		exit(EXIT_FAILURE);
 	}
 
-	struct hostent *he;    //for getting incoming connections ip address
-	struct in_addr **addr_list;
+//	struct hostent *he;    //for getting incoming connections ip address
+//	struct in_addr **addr_list;
 	char hostname[128];
 
 	char inIpAddress[INET6_ADDRSTRLEN];    //stores incoming connections ip address
 
 	gethostname(hostname, sizeof hostname);
-	he = gethostbyname(hostname);
-	addr_list = (struct in_addr **) he->h_addr_list;
+//	he = gethostbyname(hostname);
+//	addr_list = (struct in_addr **) he->h_addr_list;
 
 	sockaddr_in their_addr;    //for connecting to incoming connections socket
 	socklen_t sin_size = sizeof(their_addr);
@@ -333,7 +333,7 @@ void establishConnection() {
 				fprintf(stderr, "Error pulling file stats.\n");
 				exit(EXIT_FAILURE);
 			}
-			sprintf(file_size, "%d", file_stat.st_size);
+			sprintf(file_size, "%d", (unsigned) file_stat.st_size);
 			int len = send(new_fd, file_size, sizeof(file_size), 0);
 			if (len < 0) {
 				fprintf(stderr, "Error on sending file size\n");
@@ -376,7 +376,7 @@ void establishConnection() {
 				fprintf(stderr, "Error pulling file stats.\n");
 				exit(EXIT_FAILURE);
 			}
-			sprintf(file_size, "%d", file_stat.st_size);
+			sprintf(file_size, "%d", (unsigned) file_stat.st_size);
 			int len = send(new_fd, file_size, sizeof(file_size), 0);    //send on outgoing socket, int for error status
 			if (len < 0) {
 				fprintf(stderr, "Error on sending file size\n");
