@@ -344,8 +344,13 @@ void establishConnection() {
 				remain_data -= sent_bytes;
 			}
 
-			string rmCommand = "rm " + filename;	//removes temp file to ensure file makes it back to awget
-			system(rmCommand.c_str());
+//			string rmCommand = "rm " + filename;	//removes temp file to ensure file makes it back to awget
+//			ifstream infile(filename);
+//			struct stat buf;
+//			if (stat(filename.c_str(), &buf) != -1) {
+//				cout << "file is good" << endl;
+//				system(rmCommand.c_str());
+//			}
 
 		} else {
 			cout << "Chainlist is empty" << endl;
@@ -392,8 +397,13 @@ void establishConnection() {
 			}
 			cout << "Goodbye!" << endl;
 
-			string rmCommand = "rm " + filename;	//removes temp file to ensure file makes it back to awget
-			system(rmCommand.c_str());
+//			string rmCommand = "rm " + filename;	//removes temp file to ensure file makes it back to awget
+//			ifstream infile(filename);
+//			struct stat buf;
+//			if (stat(filename.c_str(), &buf) != -1) {
+//				cout << "file is good" << endl;
+//				system(rmCommand.c_str());
+//			}
 		}
 	}
 }

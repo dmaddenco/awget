@@ -52,6 +52,7 @@ using std::regex_match;
 #include <fcntl.h>
 #include <iostream>
 #include <fstream>
+#include <sys/stat.h>
 
 using std::ofstream;
 
