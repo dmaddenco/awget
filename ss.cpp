@@ -395,7 +395,6 @@ void establishConnection() {
 			while (((sent_bytes = sendfile(new_fd, fd, &offset, BUFSIZE)) > 0) && (remain_data > 0)) {
 				remain_data -= sent_bytes;
 			}
-			cout << "Goodbye!" << endl;
 
 //			string rmCommand = "rm " + filename;	//removes temp file to ensure file makes it back to awget
 //			ifstream infile(filename);
