@@ -55,23 +55,31 @@ using std::regex_match;
 
 using std::ofstream;
 
-//#define MAX_PACKET_SIZE 1400
-#define MAX_PACKET_SIZE 10
+#define MAX_PACKET_SIZE 1400
 #define MAX_SSTONES_SIZE 1000
 #define MAX_URL_SIZE    200
 #define MAX_IP_SIZE    200
 #define BUFSIZE 1024
 
+/*
+ * Stepping stone information
+ */
 struct Stone {
 	string addr;
 	int port;
 };
 
+/*
+ * Initial packet sent to all sstones
+ */
 struct ConInfo {
 	char url[MAX_URL_SIZE];
 	char sstones[MAX_SSTONES_SIZE];
 };
 
+/*
+ * Packet contains file information
+ */
 struct ReturnPacket {
 	int numPackets;
 	int seqNum;
